@@ -1,147 +1,169 @@
-<!DOCTYPE html>
+
+ <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Aprendiz Quiz · Imergir</title>
+<title>Aprendiz Quiz · Gamificação NEXUS</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
 <style>
-/* --- Identidade Visual Azul & Ouro --- */
+/* --- Identidade Visual: Azul Profundo & Amarelo Ouro --- */
 *{box-sizing:border-box;margin:0;padding:0}
 body{
     font-family:'Nunito',sans-serif;
-    background: radial-gradient(circle at 50% 50%, #1a2a6c, #101a43, #050a1d);
-    color:#fff;
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-    overflow-x:hidden;
+    background: radial-gradient(circle at 50% 50%, #0d1b3e, #050a1d);
+    color:#fff; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
 }
 
-.screen{display:none;width:100%;max-width:800px;text-align:center;animation:fadeUp .5s ease-out}
+.screen{display:none; width:100%; max-width:850px; text-align:center; animation:fadeUp 0.5s ease-out}
 .screen.active{display:block}
 .orb{font-family:'Orbitron',monospace;font-weight:900}
 
-/* Botões Estilo Kahoot Premium */
-.btn{cursor:pointer;border:none;border-radius:14px;font-family:'Nunito',sans-serif;font-weight:900;font-size:16px;padding:16px 30px;transition:all .2s;color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:10px}
-.btn:hover:not(:disabled){transform:translateY(-3px);box-shadow: 0 10px 20px rgba(0,0,0,0.3)}
-.btn-gold{background: linear-gradient(135deg,#d4af37, #f1c40f); color:#1a1a2e}
-.btn-blue{background: linear-gradient(135deg,#1e40af, #3b82f6)}
+/* Botões Gamificados */
+.btn{cursor:pointer; border:none; border-radius:15px; font-weight:900; transition:all 0.2s; display:inline-flex; align-items:center; justify-content:center; gap:10px}
+.btn-gold{background:linear-gradient(135deg,#d4af37, #f1c40f); color:#1a1a2e; padding:18px 40px; font-size:18px}
+.btn-blue{background:linear-gradient(135deg,#1e40af, #3b82f6); color:#fff; padding:15px 30px}
+.btn:disabled{opacity:0.4; cursor:not-allowed}
 
-/* Campo Central de Anexo */
-.upload-container{
-    background: rgba(255,255,255,0.05);
-    border: 2px dashed #FFD700;
-    border-radius: 30px;
-    padding: 60px 40px;
-    margin-bottom: 20px;
-    transition: 0.3s;
+/* --- Área de Upload --- */
+.upload-card{
+    background: rgba(255,255,255,0.03); border: 2px dashed #3b82f6; border-radius: 25px;
+    padding: 60px 40px; margin-bottom: 25px; transition: 0.3s;
 }
-.upload-container:hover{background: rgba(255,255,255,0.08)}
+.upload-card.ready{border-color:#FFD700; background: rgba(255,215,0,0.05)}
 
-/* QR Code & Lobby */
-.qr-box{background:#fff; padding:15px; border-radius:20px; display:inline-block; margin:20px 0}
-.room-code{font-size:45px; color:#FFD700; letter-spacing:5px; margin:10px 0}
+/* --- Quiz UI (Estilo Kahoot/Flora Alves) --- */
+.q-grid{display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:20px}
+.opt{padding:25px; border-radius:18px; border:none; color:#fff; font-size:20px; font-weight:800; text-align:left; cursor:pointer; position:relative; overflow:hidden}
+.timer-container{width:100%; height:12px; background:rgba(255,255,255,0.1); border-radius:6px; margin:20px 0}
+.timer-bar{height:100%; background:#FFD700; width:100%; transition: width 1s linear}
 
-/* Quiz UI */
-.options-grid{display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:20px}
-.opt{padding:20px; border-radius:15px; font-weight:800; text-align:left; cursor:pointer; display:flex; align-items:center; gap:15px; font-size:18px; border:none; color:#fff}
-.timer-bar{width:100%; height:10px; background:rgba(255,255,255,0.1); border-radius:5px; margin:20px 0; overflow:hidden}
-.timer-fill{height:100%; background:#FFD700; width:100%; transition: width 1s linear}
+/* --- Ranking Dinâmico --- */
+.rank-list{margin-top:20px; text-align:left}
+.rank-item{
+    display:flex; align-items:center; gap:15px; padding:12px; background:rgba(255,255,255,0.05); 
+    border-radius:12px; margin-bottom:8px; border:1px solid transparent; transition: all 0.5s;
+}
+.rank-item.top{border-color:#FFD700; background:rgba(255,215,0,0.1)}
 
-/* Pódio Lego Olímpico */
-.podium-area{display:flex; align-items:flex-end; justify-content:center; gap:10px; height:350px; margin-top:40px}
-.place{width:150px; position:relative; display:flex; flex-direction:column; align-items:center}
-.lego-avatar{width:80px; height:100px; margin-bottom:10px; transition: 0.5s}
-.block{width:100%; border-radius:10px 10px 0 0; display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:900; color:rgba(0,0,0,0.3)}
+/* --- Pódio Lego Olímpico --- */
+.podium-area{display:flex; align-items:flex-end; justify-content:center; gap:15px; height:400px; margin-top:30px}
+.lego-guy{width:80px; text-align:center; position:relative}
+.medal{position:absolute; top:40px; left:50%; transform:translateX(-50%); font-size:24px; z-index:2}
+.block{width:140px; display:flex; align-items:center; justify-content:center; font-size:45px; font-weight:900; color:rgba(0,0,0,0.2); border-radius:12px 12px 0 0}
+.p1 .block{height:220px; background:linear-gradient(#FFD700, #B8860B)}
+.p2 .block{height:160px; background:linear-gradient(#C0C0C0, #707070)}
+.p3 .block{height:110px; background:linear-gradient(#CD7F32, #8B4513)}
 
-.first .block {height:180px; background: linear-gradient(#FFD700, #B8860B)}
-.second .block {height:140px; background: linear-gradient(#C0C0C0, #707070)}
-.third .block {height:100px; background: linear-gradient(#CD7F32, #8B4513)}
-
-@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0; transform:translateY(20px)}to{opacity:1; transform:translateY(0)}}
 </style>
 </head>
 <body>
 
 <div id="screen-instructor" class="screen active">
-    <h1 class="orb" style="color:#FFD700; font-size:42px; margin-bottom:10px">Aprendiz Quiz</h1>
-    <p style="margin-bottom:40px; opacity:0.8">Prepare sua aula para a fase <b>IMERGIR</b></p>
+    <h1 class="orb" style="color:#FFD700; font-size:48px">Aprendiz Quiz</h1>
+    <p style="opacity:0.7; margin-bottom:30px">Fase <b>IMERGIR</b> · Metodologia Aprendiz Protagonista</p>
     
-    <div class="upload-container">
-        <div id="upload-icon" style="font-size:50px; margin-bottom:15px">📂</div>
-        <p style="font-weight:800; font-size:20px">Arraste ou anexe sua apresentação</p>
-        <p style="font-size:14px; opacity:0.5; margin-top:5px">Formatos aceitos: PDF ou PPTX</p>
-        <input type="file" id="fileInput" style="margin-top:30px">
+    <div class="upload-card" id="dropZone">
+        <div id="upload-ui">
+            <div style="font-size:60px">📂</div>
+            <p style="font-weight:900; font-size:22px; margin-top:10px">Anexe sua apresentação aqui</p>
+            <p style="font-size:14px; opacity:0.5">PDF ou PPTX da aula</p>
+        </div>
+        <div id="ready-ui" style="display:none">
+            <div style="font-size:60px">✅</div>
+            <p id="file-name" style="color:#FFD700; font-weight:800"></p>
+        </div>
+        <input type="file" id="fileIn" style="display:none">
     </div>
     
-    <button class="btn btn-gold" id="btnCreate" disabled onclick="processAI()">✨ CRIAR PERGUNTAS COM IA</button>
+    <button class="btn btn-gold" id="btnAI" disabled onclick="simulateAI()">✨ GERAR PERGUNTAS COM IA</button>
 </div>
 
 <div id="screen-lobby" class="screen">
-    <h2 class="orb" style="color:#FFD700">SALA PRONTA!</h2>
-    <p>Peça para os alunos escanearem o código abaixo</p>
-    <div class="qr-box"><canvas id="qrcode"></canvas></div>
-    <div class="room-code orb" id="roomCode">000 000</div>
-    <div id="playerList" style="margin:20px 0; min-height:40px">Aguardando participantes...</div>
-    <button class="btn btn-blue" onclick="startQuiz()">🎯 INICIAR QUIZZ</button>
+    <h2 class="orb" style="color:#FFD700">SALA DE IMERSÃO</h2>
+    <div style="background:#fff; padding:15px; border-radius:20px; display:inline-block; margin:20px 0">
+        <canvas id="qr"></canvas>
+    </div>
+    <p class="orb" style="font-size:30px; letter-spacing:5px">PIN: <span id="pin">--- ---</span></p>
+    <div id="playerCount" style="margin:20px 0; font-weight:800; color:#3b82f6">0 aprendizes conectados...</div>
+    <button class="btn btn-gold" onclick="startQuiz()">🎯 INICIAR JOGO</button>
 </div>
 
 <div id="screen-quiz" class="screen">
-    <div id="timerDisplay" class="orb" style="font-size:30px; color:#FFD700">30</div>
-    <div class="timer-bar"><div id="timerFill" class="timer-fill"></div></div>
-    <h2 id="questionText" style="font-size:26px; margin:20px 0"></h2>
-    <div class="options-grid" id="optionsGrid"></div>
+    <div id="qCounter" class="orb" style="color:#3b82f6; margin-bottom:10px">Questão 1/10</div>
+    <div class="timer-container"><div id="tBar" class="timer-bar"></div></div>
+    <h2 id="qText" style="font-size:28px; margin:20px 0; text-align:left"></h2>
+    <div class="q-grid" id="qGrid"></div>
+</div>
+
+<div id="screen-rank" class="screen">
+    <h2 class="orb" style="color:#FFD700">RANKING DA RODADA</h2>
+    <div id="rankingList" class="rank-list"></div>
+    <button class="btn btn-blue" style="margin-top:30px" onclick="nextQuestion()">PRÓXIMA PERGUNTA ➡</button>
 </div>
 
 <div id="screen-podium" class="screen">
-    <h1 class="orb" style="color:#FFD700">PÓDIO FINAL</h1>
+    <h1 class="orb" style="color:#FFD700; font-size:40px">PÓDIO FINAL</h1>
     <div class="podium-area">
-        <div class="place second">
-            <div class="lego-avatar">🥈</div>
-            <div id="p2-name" style="font-size:12px">--</div>
-            <div class="block">2</div>
+        <div class="p2 lego-guy">
+            <div class="medal">🥈</div>
+            <div style="font-size:40px">👤</div>
+            <div id="name2" style="font-size:12px; margin-bottom:5px">--</div>
+            <div class="block">2º</div>
         </div>
-        <div class="place first">
-            <div class="lego-avatar" style="font-size:50px">🏆<br>🥇</div>
-            <div id="p1-name" style="font-weight:bold">--</div>
-            <div class="block">1</div>
+        <div class="p1 lego-guy">
+            <div class="medal">🥇</div>
+            <div style="font-size:60px">👑</div>
+            <div id="name1" style="font-weight:900; color:#FFD700; margin-bottom:5px">--</div>
+            <div class="block">1º</div>
         </div>
-        <div class="place third">
-            <div class="lego-avatar">🥉</div>
-            <div id="p3-name" style="font-size:12px">--</div>
-            <div class="block">3</div>
+        <div class="p3 lego-guy">
+            <div class="medal">🥉</div>
+            <div style="font-size:40px">👤</div>
+            <div id="name3" style="font-size:12px; margin-bottom:5px">--</div>
+            <div class="block">3º</div>
         </div>
     </div>
-    <button class="btn btn-gold" style="margin-top:40px" onclick="location.reload()">🔄 NOVA AULA</button>
+    <button class="btn btn-gold" style="margin-top:40px" onclick="location.reload()">REINICIAR EXPERIÊNCIA</button>
 </div>
 
 <script>
-let quizData = [];
-let currentQ = 0;
-let players = [];
+// --- Lógica de Gamificação & IA ---
+let players = [
+    {name: "Diego (Você)", score: 0, avatar: "🦁", lastTime: 0, lastCorrect: false},
+    {name: "Aprendiz Beta", score: 0, avatar: "🤖", lastTime: 0, lastCorrect: false},
+    {name: "Aprendiz Gama", score: 0, avatar: "🦊", lastTime: 0, lastCorrect: false}
+];
+let quiz = [];
+let currentIdx = 0;
 let timer;
 
-document.getElementById('fileInput').addEventListener('change', function() {
-    document.getElementById('btnCreate').disabled = false;
-    document.getElementById('upload-icon').textContent = "📄";
-});
+document.getElementById('dropZone').onclick = () => document.getElementById('fileIn').click();
+document.getElementById('fileIn').onchange = (e) => {
+    if(e.target.files[0]) {
+        document.getElementById('dropZone').classList.add('ready');
+        document.getElementById('upload-ui').style.display = 'none';
+        document.getElementById('ready-ui').style.display = 'block';
+        document.getElementById('file-name').textContent = e.target.files[0].name;
+        document.getElementById('btnAI').disabled = false;
+    }
+};
 
-// SIMULAÇÃO DA IA CRIANDO PERGUNTAS A PARTIR DO SLIDE
-function processAI() {
-    const btn = document.getElementById('btnCreate');
-    btn.innerHTML = "🤖 AGENTE IA ANALISANDO SLIDES...";
+function simulateAI() {
+    const btn = document.getElementById('btnAI');
+    btn.innerHTML = "🧠 AGENTE IA ANALISANDO SLIDES...";
     btn.disabled = true;
 
     setTimeout(() => {
-        // Aqui a IA geraria as questões baseadas no conteúdo real
-        quizData = [
-            {q: "Qual o foco principal da fase IMERGIR?", opts: ["Execução rápida", "Empatia e Contexto", "Finalização", "Vendas"], a: 1},
-            {q: "O que define um Aprendiz Protagonista?", opts: ["Esperar ordens", "Reclamar do erro", "Assumir a liderança", "Trabalhar isolado"], a: 2}
-            // ... (geraria 10 perguntas)
-        ];
+        // Mock de questões geradas pela IA
+        for(let i=1; i<=10; i++) {
+            quiz.push({
+                q: `Pergunta de Imergir #${i}: Baseado no slide anexado, qual o ponto crítico?`,
+                opts: ["Opção Errada A", "Opção Correta ✅", "Opção Errada C", "Opção Errada D"],
+                ans: 1
+            });
+        }
         showLobby();
     }, 2000);
 }
@@ -149,72 +171,109 @@ function processAI() {
 function showLobby() {
     document.getElementById('screen-instructor').classList.remove('active');
     document.getElementById('screen-lobby').classList.add('active');
-    document.getElementById('roomCode').textContent = Math.floor(100000 + Math.random() * 900000);
+    document.getElementById('pin').textContent = Math.floor(100000 + Math.random() * 900000);
     drawQR();
 }
 
 function drawQR() {
-    const canvas = document.getElementById('qrcode');
+    const canvas = document.getElementById('qr');
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = "#101a43";
-    for(let i=0; i<20; i++) {
-        for(let j=0; j<20; j++) {
-            if(Math.random() > 0.6) ctx.fillRect(i*8, j*8, 6, 6);
-        }
-    }
+    ctx.fillStyle = "#0d1b3e";
+    for(let i=0; i<25; i++) for(let j=0; j<25; j++) if(Math.random()>0.6) ctx.fillRect(i*6, j*6, 5, 5);
 }
 
 function startQuiz() {
     document.getElementById('screen-lobby').classList.remove('active');
     document.getElementById('screen-quiz').classList.add('active');
-    showQuestion();
+    loadQuestion();
 }
 
-function showQuestion() {
-    if(currentQ >= quizData.length) { showPodium(); return; }
-    
-    const q = quizData[currentQ];
-    document.getElementById('questionText').textContent = q.q;
-    const grid = document.getElementById('optionsGrid');
+function loadQuestion() {
+    const q = quiz[currentIdx];
+    document.getElementById('qCounter').textContent = `Questão ${currentIdx+1}/10`;
+    document.getElementById('qText').textContent = q.q;
+    const grid = document.getElementById('qGrid');
     grid.innerHTML = '';
     
     const colors = ['#e21b3c', '#1368ce', '#d89e00', '#26890c'];
-    q.opts.forEach((opt, i) => {
-        grid.innerHTML += `<button class="opt" style="background:${colors[i]}" onclick="nextQ()">${opt}</button>`;
+    q.opts.forEach((o, i) => {
+        grid.innerHTML += `<button class="opt" style="background:${colors[i]}" onclick="answer(${i})">${o}</button>`;
     });
 
     startTimer();
 }
 
 function startTimer() {
-    let sec = 30;
-    const bar = document.getElementById('timerFill');
-    const text = document.getElementById('timerDisplay');
+    let timeLeft = 25;
+    const bar = document.getElementById('tBar');
     bar.style.width = "100%";
     
     clearInterval(timer);
     timer = setInterval(() => {
-        sec--;
-        text.textContent = sec;
-        bar.style.width = (sec/30)*100 + "%";
-        if(sec <= 0) nextQ();
+        timeLeft--;
+        bar.style.width = (timeLeft/25)*100 + "%";
+        if(timeLeft <= 0) showRanking();
     }, 1000);
 }
 
-function nextQ() {
-    currentQ++;
-    showQuestion();
+function answer(idx) {
+    clearInterval(timer);
+    // Simula cálculo de pontos (Velocidade + Acerto)
+    const timeUsed = 25 - (parseFloat(document.getElementById('tBar').style.width)/4);
+    players[0].lastCorrect = (idx === quiz[currentIdx].ans);
+    players[0].lastTime = timeUsed;
+    
+    // Simula outros jogadores
+    players[1].lastCorrect = Math.random() > 0.4;
+    players[1].lastTime = Math.random() * 25;
+    players[2].lastCorrect = Math.random() > 0.5;
+    players[2].lastTime = Math.random() * 25;
+
+    showRanking();
 }
 
-function showPodium() {
+function showRanking() {
+    // Cálculo de Score (Conceito Flora Alves: Feedback de Performance)
+    players.forEach(p => {
+        if(p.lastCorrect) p.score += Math.round((25 - p.lastTime) * 100);
+        else p.score -= Math.round(p.lastTime * 10); // Penaliza erro lento
+    });
+
+    players.sort((a,b) => b.score - a.score);
+
     document.getElementById('screen-quiz').classList.remove('active');
-    document.getElementById('screen-podium').classList.add('active');
-    // Simulação de nomes para o ranking
-    document.getElementById('p1-name').textContent = "Vencedor Protagonista";
-    document.getElementById('p2-name').textContent = "Aprendiz 2";
-    document.getElementById('p3-name').textContent = "Aprendiz 3";
+    document.getElementById('screen-rank').classList.add('active');
+
+    const list = document.getElementById('rankingList');
+    list.innerHTML = players.map((p, i) => `
+        <div class="rank-item ${i===0?'top':''}">
+            <span class="orb">${i+1}º</span>
+            <span style="font-size:24px">${p.avatar}</span>
+            <span style="flex:1; font-weight:800">${p.name}</span>
+            <span class="orb" style="color:#FFD700">${p.score} pts</span>
+        </div>
+    `).join('');
 }
 
+function nextQuestion() {
+    currentIdx++;
+    if(currentIdx < 10) {
+        document.getElementById('screen-rank').classList.remove('active');
+        document.getElementById('screen-quiz').classList.add('active');
+        loadQuestion();
+    } else {
+        showFinalPodium();
+    }
+}
+
+function showFinalPodium() {
+    document.getElementById('screen-rank').classList.remove('active');
+    document.getElementById('screen-podium').classList.add('active');
+    
+    document.getElementById('name1').textContent = players[0].name;
+    document.getElementById('name2').textContent = players[1].name;
+    document.getElementById('name3').textContent = players[2].name;
+}
 </script>
 </body>
 </html>
