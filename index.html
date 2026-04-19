@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma Aprendiz Pro - Camp SBC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --primary: #8b5cf6; --secondary: #ede9fe; }
+        .bg-lilas { background-color: var(--primary); }
+        .text-lilas { color: var(--primary); }
+        .tab-active { border-bottom: 3px solid var(--primary); color: var(--primary); font-weight: bold; }
+        .fase-bloqueada { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+        .fase-concluida { color: #10b981; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 50; }
+        .card-aula:hover { transform: translateY(-5px); transition: all 0.3s; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<div id="login-screen" class="flex items-center justify-center min-h-screen bg-lilas">
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center">
+        <i class="fas fa-book-open text-lilas text-5xl mb-4"></i>
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">Plataforma Aprendiz Pro</h1>
+        <div class="space-y-4">
+            <input type="email" id="email" placeholder="E-mail" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400">
+            <input type="password" id="password" placeholder="Senha" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400">
+            <button onclick="handleLogin()" class="w-full bg-lilas text-white p-3 rounded-lg font-bold hover:bg-purple-700 transition">🚀 Entrar no Sistema</button>
+        </div>
+        <div class="mt-6 p-4 bg-purple-50 rounded-lg text-sm text-left">
+            <p class="font-bold text-purple-800">Acesso Rápido:</p>
+            <button onclick="quickLogin('admin')" class="text-purple-600 underline">Login Admin</button> | 
+            <button onclick="quickLogin('jovem')" class="text-purple-600 underline">Login Jovem</button>
+        </div>
+    </div>
+</div>
+
+<div id="main-dashboard" class="hidden">
+    <nav class="bg-white shadow-md p-4 flex justify-between items-center px-8">
+        <div class="flex items-center gap-2">
+            <i class="fas fa-graduation-cap text-lilas text-2xl"></i>
+            <span class="font-bold text-xl text-gray-700">Aprendiz Pro</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="user-display" class="text-gray-600 font-medium"></span>
+            <button onclick="logout()" class="text-red-500 hover:text-red-700"><i class="fas fa-sign-out-alt"></i> Sair</button>
+        </div>
+    </nav>
+
+    <div id="admin-tabs" class="hidden bg-white border-b flex justify-center gap-8">
+        <button onclick="switchAdminTab('gestao')" id="tab-gestao" class="p-4 tab-active">Gestão Administrativa</button>
+        <button onclick="switchAdminTab('aprendizado')" id="tab-aprendizado" class="p-4">Gestão da Aprendizagem</button>
+    </div>
+
+    <main id="content-admin-gestao" class="p-8 hidden">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-purple-500">
+                <p class="text-gray-500 text-sm">Total de Jovens</p>
+                <h3 class="text-2xl font-bold" id="stat-jovens">0</h3>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
+                <p class="text-gray-500 text-sm">Contratos Ativos</p>
+                <h3 class="text-2xl font-bold" id="stat-contratos">0</h3>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Jovens Aprendizes</h2>
+                <button onclick="openModal('modal-jovem')" class="bg-lilas text-white px-4 py-2 rounded-lg text-sm">+ Novo Jovem</button>
+            </div>
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="text-gray-400 border-b">
+                        <th class="py-2">Nome</th>
+                        <th>Curso</th>
+                        <th>Carga</th>
+                        <th>Status</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-jovens"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <main id="content-admin-aprendizado" class="p-8 hidden">
+        <h2 class="text-2xl font-bold mb-6 text-lilas">Cursos & Metodologia Aprendiz Pro</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="grid-cursos">
+            </div>
+    </main>
+
+    <main id="content-jovem" class="p-8 hidden">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white p-6 rounded-2xl shadow-sm mb-6 flex justify-between items-center border-b-4 border-purple-500">
+                <div>
+                    <h2 class="text-2xl font-bold" id="jovem-nome">Olá, Jovem!</h2>
+                    <p class="text-gray-500" id="jovem-curso">Curso: Administração</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-lilas font-bold text-xl">Nível 1</span>
+                    <p class="text-sm text-gray-400">150 / 500 XP</p>
+                </div>
+            </div>
+
+            <div id="trilha-pastas">
+                <h3 class="font-bold mb-4 flex items-center gap-2"><i class="fas fa-folder-open text-yellow-500"></i> Ciclo Básico</h3>
+                <div class="grid grid-cols-1 gap-4 mb-8">
+                    <div onclick="abrirAula('Comunicação Assertiva')" class="card-aula bg-white p-4 rounded-xl shadow-sm cursor-pointer flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-lilas"><i class="fas fa-comment"></i></div>
+                            <div>
+                                <p class="font-bold">Aula 01: Comunicação Assertiva</p>
+                                <p class="text-xs text-gray-400">Metodologia: Aprendiz Pro</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div id="modal-aula" class="modal">
+    <div class="bg-white w-full max-w-5xl h-[90vh] rounded-2xl overflow-hidden flex flex-col">
+        <div class="p-4 bg-lilas text-white flex justify-between items-center">
+            <h3 id="modal-aula-titulo" class="font-bold text-lg">Aula: Aprendiz Pro</h3>
+            <button onclick="closeModal('modal-aula')" class="text-2xl">&times;</button>
+        </div>
+        
+        <div class="flex bg-gray-100 border-b">
+            <button onclick="setFaseAula(1)" id="tab-fase1" class="flex-1 p-4 tab-active"><i class="fas fa-eye mr-2"></i> 1. Despertar</button>
+            <button onclick="setFaseAula(2)" id="tab-fase2" class="flex-1 p-4 fase-bloqueada"><i class="fas fa-book-open mr-2"></i> 2. Imergir</button>
+            <button onclick="setFaseAula(3)" id="tab-fase3" class="flex-1 p-4 fase-bloqueada"><i class="fas fa-vial mr-2"></i> 3. Experimentar</button>
+            <button onclick="setFaseAula(4)" id="tab-fase4" class="flex-1 p-4 fase-bloqueada"><i class="fas fa-rocket mr-2"></i> 4. Impactar</button>
+        </div>
+
+        <div class="flex-1 p-8 overflow-y-auto" id="aula-container">
+            <div id="fase1-content" class="space-y-6">
+                <div class="aspect-video bg-gray-200 rounded-xl flex items-center justify-center">
+                    <p class="text-gray-500"><i class="fab fa-youtube text-red-500 text-3xl mr-2"></i> [Vídeo de Storytelling / Introdução]</p>
+                </div>
+                <div class="space-y-4">
+                    <p class="font-bold text-gray-700">O que você sentiu ao ver essa situação?</p>
+                    <textarea id="resp1" class="w-full p-4 border rounded-xl" rows="2" placeholder="Sua resposta..."></textarea>
+                    <p class="font-bold text-gray-700">Como você reagiria no lugar do protagonista?</p>
+                    <textarea id="resp2" class="w-full p-4 border rounded-xl" rows="2" placeholder="Sua resposta..."></textarea>
+                    <button onclick="concluirFase(1)" class="bg-lilas text-white px-8 py-3 rounded-xl font-bold w-full">Finalizar Despertar e Avançar ➔</button>
+                </div>
+            </div>
+
+            <div id="fase2-content" class="hidden space-y-6 text-center">
+                <h2 class="text-2xl font-bold text-lilas">Conceitos do Tema</h2>
+                <div class="bg-purple-50 p-10 rounded-2xl border-2 border-dashed border-purple-200">
+                    <p class="text-gray-600 mb-4">[Slide 1 de 10 - Conceitos teóricos discorridos]</p>
+                    <button onclick="concluirFase(2)" class="bg-lilas text-white px-8 py-3 rounded-xl font-bold">Concluir Imergir e Abrir Quiz ➔</button>
+                </div>
+            </div>
+
+            <div id="fase3-content" class="hidden space-y-6">
+                <div class="bg-blue-600 text-white p-8 rounded-2xl text-center">
+                    <h2 class="text-3xl font-bold mb-4">Quiz Kahoot - Aprendiz Pro</h2>
+                    <p class="mb-6">Responda rápido para ganhar mais pontos!</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="concluirFase(3)" class="bg-red-500 p-6 rounded-lg font-bold hover:bg-red-600">Opção A</button>
+                        <button onclick="concluirFase(3)" class="bg-blue-400 p-6 rounded-lg font-bold hover:bg-blue-500">Opção B</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="fase4-content" class="hidden space-y-6">
+                <h2 class="text-2xl font-bold text-gray-800">Impactar: Hora de Aplicar!</h2>
+                <div class="space-y-4">
+                    <label class="block font-bold">1. Como usará esse conhecimento hoje no seu trabalho?</label>
+                    <textarea id="imp1" class="w-full p-3 border rounded-lg"></textarea>
+                    <label class="block font-bold">2. Como pode multiplicar isso com seus colegas?</label>
+                    <textarea id="imp2" class="w-full p-3 border rounded-lg"></textarea>
+                    <label class="block font-bold">3. Como isso contribui para seu crescimento?</label>
+                    <textarea id="imp3" class="w-full p-3 border rounded-lg"></textarea>
+                    <button onclick="finalizarAulaCompleta()" class="bg-green-500 text-white px-8 py-3 rounded-xl font-bold w-full shadow-lg">Finalizar Aula e Gerar Badge 🏆</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-jovem" class="modal">
+    <div class="bg-white p-8 rounded-2xl w-full max-w-md">
+        <h2 class="text-xl font-bold mb-4">Cadastrar Jovem</h2>
+        <div class="space-y-4">
+            <input id="j-nome" type="text" placeholder="Nome Completo" class="w-full p-2 border rounded">
+            <input id="j-email" type="email" placeholder="E-mail" class="w-full p-2 border rounded">
+            <select id="j-curso" class="w-full p-2 border rounded">
+                <option>Administração</option>
+                <option>Logística</option>
+                <option>Comércio e Varejo</option>
+                <option>Arco Bancário</option>
+            </select>
+            <select id="j-carga" class="w-full p-2 border rounded">
+                <option value="4">4 Horas (Quartas)</option>
+                <option value="6">6 Horas (Segundas)</option>
+            </select>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeModal('modal-jovem')" class="px-4 py-2">Cancelar</button>
+                <button onclick="salvarJovem()" class="bg-lilas text-white px-4 py-2 rounded">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ESTADO DA APLICAÇÃO
+    let state = JSON.parse(localStorage.getItem('aprendiz_pro_db')) || {
+        jovens: [
+            { id: 1, nome: "Jovem Exemplo", email: "jovem@email.com", curso: "Administração", carga: "6", status: "Ativo", xp: 150 }
+        ],
+        currentUser: null
+    };
+
+    const cursosNomes = ["Administração", "Logística", "Comércio e Varejo", "Arco Bancário", "Serviços de Alimentação", "Práticas Bancárias", "Operador de Telemarketing", "Auxiliar de Produção"];
+
+    function save() { localStorage.setItem('aprendiz_pro_db', JSON.stringify(state)); render(); }
+
+    function handleLogin() {
+        const email = document.getElementById('email').value;
+        if (email === 'admin@sistema.com') state.currentUser = { role: 'admin', nome: 'Administrador' };
+        else {
+            const j = state.jovens.find(x => x.email === email);
+            if (j) state.currentUser = { ...j, role: 'jovem' };
+            else return alert("Usuário não encontrado!");
+        }
+        showDashboard();
+    }
+
+    function quickLogin(tipo) {
+        if(tipo === 'admin') { document.getElementById('email').value = 'admin@sistema.com'; document.getElementById('password').value = 'admin123'; }
+        else { document.getElementById('email').value = 'jovem@email.com'; document.getElementById('password').value = 'jovem123'; }
+        handleLogin();
+    }
+
+    function showDashboard() {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('main-dashboard').classList.remove('hidden');
+        document.getElementById('user-display').innerText = state.currentUser.nome;
+
+        if(state.currentUser.role === 'admin') {
+            document.getElementById('admin-tabs').classList.remove('hidden');
+            switchAdminTab('gestao');
+        } else {
+            document.getElementById('content-jovem').classList.remove('hidden');
+            document.getElementById('jovem-nome').innerText = `Olá, ${state.currentUser.nome}!`;
+            document.getElementById('jovem-curso').innerText = `Curso: ${state.currentUser.curso} (${state.currentUser.carga}h)`;
+        }
+        save();
+    }
+
+    function switchAdminTab(tab) {
+        document.getElementById('content-admin-gestao').classList.add('hidden');
+        document.getElementById('content-admin-aprendizado').classList.add('hidden');
+        document.getElementById('tab-gestao').className = 'p-4';
+        document.getElementById('tab-aprendizado').className = 'p-4';
+
+        document.getElementById(`content-admin-${tab}`).classList.remove('hidden');
+        document.getElementById(`tab-${tab}`).className = 'p-4 tab-active';
+        if(tab === 'aprendizado') renderCursosAdmin();
+    }
+
+    function renderCursosAdmin() {
+        const grid = document.getElementById('grid-cursos');
+        grid.innerHTML = cursosNomes.map(c => `
+            <div class="bg-white p-4 rounded-xl shadow-sm border text-center">
+                <i class="fas fa-folder text-yellow-500 text-3xl mb-2"></i>
+                <p class="font-bold text-sm">${c}</p>
+                <p class="text-xs text-gray-400">2 Ciclos | Aprendiz Pro</p>
+            </div>
+        `).join('');
+    }
+
+    function render() {
+        const lista = document.getElementById('lista-jovens');
+        if(!lista) return;
+        lista.innerHTML = state.jovens.map(j => `
+            <tr class="border-b text-sm">
+                <td class="py-3 font-bold">${j.nome}</td>
+                <td>${j.curso}</td>
+                <td>${j.carga}h</td>
+                <td><span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">${j.status}</span></td>
+                <td><button onclick="deletarJovem(${j.id})" class="text-red-400"><i class="fas fa-trash"></i></button></td>
+            </tr>
+        `).join('');
+        document.getElementById('stat-jovens').innerText = state.jovens.length;
+        document.getElementById('stat-contratos').innerText = state.jovens.filter(x => x.status === 'Ativo').length;
+    }
+
+    function salvarJovem() {
+        const novo = {
+            id: Date.now(),
+            nome: document.getElementById('j-nome').value,
+            email: document.getElementById('j-email').value,
+            curso: document.getElementById('j-curso').value,
+            carga: document.getElementById('j-carga').value,
+            status: "Ativo",
+            xp: 0
+        };
+        state.jovens.push(novo);
+        closeModal('modal-jovem');
+        save();
+    }
+
+    // LÓGICA DA AULA (METODOLOGIA APRENDIZ PRO)
+    function abrirAula(titulo) {
+        document.getElementById('modal-aula-titulo').innerText = `Aula: ${titulo}`;
+        setFaseAula(1);
+        openModal('modal-aula');
+    }
+
+    function setFaseAula(num) {
+        for(let i=1; i<=4; i++) document.getElementById(`fase${i}-content`).classList.add('hidden');
+        document.getElementById(`fase${num}-content`).classList.remove('hidden');
+        
+        // Estilo das abas
+        for(let i=1; i<=4; i++) {
+            const el = document.getElementById(`tab-fase${i}`);
+            if(i === num) el.className = "flex-1 p-4 tab-active";
+            else if(el.classList.contains('fase-bloqueada')) el.className = "flex-1 p-4 fase-bloqueada";
+            else el.className = "flex-1 p-4 text-gray-400";
+        }
+    }
+
+    function concluirFase(num) {
+        if(num < 4) {
+            document.getElementById(`tab-fase${num+1}`).classList.remove('fase-bloqueada');
+            setFaseAula(num + 1);
+            alert(`Fase ${num} concluída! +50 XP 🎓`);
+        }
+    }
+
+    function finalizarAulaCompleta() {
+        alert("Parabéns! Você completou a aula na metodologia Aprendiz Pro e impactou seu futuro! +100 XP 🏆");
+        closeModal('modal-aula');
+    }
+
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function logout() { location.reload(); }
+
+    window.onload = render;
+</script>
+</body>
+</html>
