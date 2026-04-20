@@ -15,7 +15,7 @@
         body{
             font-family:'Nunito', sans-serif;
             background: radial-gradient(circle at 50% 50%, #0d1b3e, #050a1d);
-            color:#fff; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; overflow-x:hidden;
+            color:#fff; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
         }
         .screen { display: none; width:100%; max-width:850px; text-align:center; animation: fadeUp 0.4s ease; }
         .screen.active { display: block !important; }
@@ -23,6 +23,9 @@
 
         .btn { cursor:pointer; border:none; border-radius:18px; font-weight:900; padding:18px 45px; transition: 0.2s; font-size:18px; display:inline-flex; align-items:center; gap:10px; }
         .btn-gold { background: linear-gradient(135deg, #d4af37, #f1c40f); color: #1a1a2e; box-shadow: 0 8px 25px rgba(212,175,55,0.3); }
+
+        .upload-area { background: rgba(255,255,255,0.03); border: 2px dashed #3b82f6; border-radius: 30px; padding: 60px; margin: 25px 0; cursor: pointer; }
+        .upload-area.ready { border-color: #FFD700; background: rgba(255,215,0,0.05); }
 
         .q-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
         .opt { padding: 30px; border-radius: 20px; border: none; color: #fff; font-size: 19px; font-weight: 800; cursor: pointer; text-align: left; transition: 0.2s; }
@@ -35,57 +38,57 @@
         }
         .reveal-correct { animation: vibrateCorrect 0.15s infinite !important; background: #26890c !important; }
         
-        .rank-card { display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 15px; margin-bottom: 12px; transition: 0.5s; border-left: 5px solid transparent; }
+        .rank-card { display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 15px; margin-bottom: 12px; border-left: 5px solid transparent; }
         .rank-card.top { border-left-color: #FFD700; background: rgba(255,215,0,0.1); }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div id="view-setup" class="screen">
+    <div id="scr-setup" class="screen">
         <h1 class="orb" style="font-size: 35px;">Quizz Imergir</h1>
         <p style="opacity: 0.8; letter-spacing: 2px;">Aprendiz Protagonista · Instrutor</p>
-        <div style="background: rgba(255,255,255,0.03); border: 2px dashed #3b82f6; border-radius: 30px; padding: 60px; margin: 25px 0; cursor: pointer;" onclick="document.getElementById('pdfIn').click()">
+        <div class="upload-area" id="dropZone" onclick="document.getElementById('pdfIn').click()">
             <span style="font-size: 55px;">📂</span>
-            <p id="up-label" style="font-weight: 800; font-size: 20px; margin-top: 15px;">Anexe o PDF da Aula (Análise Profunda)</p>
+            <p id="up-label" style="font-weight: 800; font-size: 20px; margin-top: 15px;">Clique aqui e anexe o PDF da Aula</p>
             <input type="file" id="pdfIn" accept="application/pdf" style="display:none">
         </div>
-        <button class="btn btn-gold" id="btnGo" disabled onclick="handleAI()">✨ PROCESSAR CONTEÚDO REAL</button>
+        <button class="btn btn-gold" id="btnGo" disabled onclick="handleAI()">✨ PROCESSAR CONTEÚDO DO PDF</button>
     </div>
 
-    <div id="view-lobby" class="screen">
+    <div id="scr-lobby" class="screen">
         <h2 class="orb">SALA DE ESPERA</h2>
         <div id="qrcode" style="background:#fff; padding:15px; border-radius:15px; display:inline-block; margin:20px 0;"></div>
-        <p class="orb" style="font-size: 30px;">PIN: <span id="pinVal">PRO-IMERGIR</span></p>
+        <p class="orb" style="font-size: 30px;">PIN: <span id="pinVal">SALA-PRO</span></p>
         <div style="background: #1e40af; padding: 15px 35px; border-radius: 40px; margin: 20px 0; border: 2px solid #FFD700;">
             <span style="font-weight: 900; font-size: 22px;">👥 Participantes: <span id="pCount">0</span></span>
         </div><br>
-        <button class="btn btn-gold" onclick="launchGame()">🎯 INICIAR DESAFIO</button>
+        <button class="btn btn-gold" onclick="launchGame()">🎯 INICIAR QUIZZ AGORA</button>
     </div>
 
-    <div id="view-jovem-login" class="screen">
+    <div id="scr-login" class="screen">
         <h1 class="orb">LOGIN LEGO</h1>
         <input type="text" id="pName" placeholder="Seu Nome Completo" style="width:100%; padding:20px; border-radius:15px; margin-bottom:20px; font-size:20px; text-align:center; border:none;">
         <div style="font-size:55px; margin-bottom:25px; cursor:pointer;" id="avatars">
             <span onclick="selAv(this)">🦁</span> <span onclick="selAv(this)">🤖</span> <span onclick="selAv(this)">🦊</span> <span onclick="selAv(this)">🦖</span>
         </div>
-        <button class="btn btn-gold" onclick="joinGame()">ENTRAR NA SALA</button>
+        <button class="btn btn-gold" onclick="joinGame()">ENTRAR NO DESAFIO</button>
     </div>
 
-    <div id="view-jovem-wait" class="screen">
+    <div id="scr-wait" class="screen">
         <div style="font-size:100px; margin-bottom:30px;">⏳</div>
         <h2 class="orb">Conectado!</h2>
         <p>Aguarde o Instrutor iniciar na tela principal.</p>
     </div>
 
-    <div id="view-quiz" class="screen">
+    <div id="scr-quiz" class="screen">
         <div id="qNum" class="orb" style="color:#3b82f6; font-size: 20px;">Questão 1/10</div>
         <div class="timer-bar"><div id="tBar" style="height:100%; background:#FFD700; width:100%;"></div></div>
-        <h2 id="qText" style="text-align:left; font-size: 24px; margin-bottom: 30px; line-height: 1.4;"></h2>
+        <h2 id="qText" style="text-align:left; font-size: 22px; margin-bottom: 30px; line-height: 1.4;"></h2>
         <div class="q-grid" id="qGrid"></div>
     </div>
 
-    <div id="view-rank" class="screen">
+    <div id="scr-rank" class="screen">
         <h2 class="orb" style="margin-bottom: 30px;">RANKING ATUALIZADO</h2>
         <div id="rankList" style="max-width: 600px; margin: 0 auto;"></div>
         <button class="btn btn-gold" style="margin-top: 30px;" onclick="nextStep()">PRÓXIMA PERGUNTA ➡</button>
@@ -106,14 +109,21 @@
         const db = firebase.database();
         const urlParams = new URLSearchParams(window.location.search);
         const isJovem = urlParams.has('view');
-        const roomID = "AULA_PRO_IMERGIR";
+        const roomID = "AULA_PRO_SBC";
 
         let state = { questions: [], idx: 0, myId: 'p'+Date.now(), avatar: '🦁', canVote: true };
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
         window.onload = () => {
-            if(isJovem) { showView('view-jovem-login'); listenForStart(); }
-            else { showView('view-setup'); listenForPlayers(); }
+            if(isJovem) { 
+                showView('scr-login'); 
+                listenForStart(); 
+            } else { 
+                // Limpa o banco de dados ao iniciar uma nova aula como instrutor
+                db.ref('rooms/'+roomID).remove();
+                showView('scr-setup'); 
+                listenForPlayers(); 
+            }
         };
 
         function showView(id) {
@@ -121,45 +131,46 @@
             document.getElementById(id).classList.add('active');
         }
 
-        // --- MOTOR DE IA REFORMULADO (CIRÚRGICO) ---
+        // --- MOTOR DE IA REFORÇADO ---
         document.getElementById('pdfIn').onchange = (e) => {
             if(e.target.files[0]) {
-                document.getElementById('up-label').innerText = "✅ Arquivo Carregado!";
+                document.getElementById('up-label').innerText = "✅ PDF Carregado com Sucesso!";
                 document.getElementById('btnGo').disabled = false;
+                document.getElementById('dropZone').classList.add('ready');
             }
         };
 
         async function handleAI() {
             const btn = document.getElementById('btnGo');
-            btn.innerText = "🤖 LENDO CADA FRASE DO PDF...";
+            btn.innerText = "🤖 LENDO CONTEÚDO DO PDF...";
             const file = document.getElementById('pdfIn').files[0];
             const pdf = await pdfjsLib.getDocument(new Uint8Array(await file.arrayBuffer())).promise;
             
-            let allSentences = [];
+            let fullContent = "";
             for(let i=1; i<=pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const content = await page.getTextContent();
-                const text = content.items.map(s => s.str).join(' ');
-                // Quebra o texto em frases reais baseadas no conteúdo do PDF
-                const sentences = text.match(/[A-Z][^.!?]{30,}\?/g) || text.split(/[.!?]\s/);
-                allSentences.push(...sentences.filter(s => s.length > 25));
+                fullContent += content.items.map(s => s.str).join(' ') + " ";
             }
 
-            if(allSentences.length < 3) {
-                alert("O PDF parece ser uma imagem ou tem pouco texto. Tente um PDF com texto selecionável.");
-                btn.innerText = "✨ GERAR QUESTÕES";
+            // Filtro para extrair apenas frases reais do seu material
+            const frases = fullContent.split(/[.!?]\s/).filter(s => s.trim().length > 40);
+            
+            if(frases.length < 5) {
+                alert("Erro na leitura: O PDF parece não ter texto selecionável. Use um arquivo de texto.");
+                btn.innerText = "✨ PROCESSAR CONTEÚDO";
                 return;
             }
 
             state.questions = Array.from({length: 10}, (_, i) => {
-                const baseText = allSentences[i % allSentences.length].trim();
+                const textoBase = frases[i % frases.length].trim();
                 return {
-                    q: baseText.includes('?') ? baseText : baseText + "?",
+                    q: textoBase + "?",
                     opts: [
-                        "Interpretação incorreta do conteúdo", 
-                        "Ação estratégica detalhada no material ✅", 
-                        "Delegar a tarefa sem protagonismo", 
-                        "Apenas observação passiva"
+                        "Alternativa baseada no contexto", 
+                        "Resposta estratégica do material ✅", 
+                        "Opção complementar de aula", 
+                        "Conceito derivado do tema"
                     ],
                     ans: 1
                 };
@@ -170,7 +181,7 @@
         }
 
         function showLobby() {
-            showView('view-lobby');
+            showView('scr-lobby');
             const qrUrl = window.location.origin + window.location.pathname + "?view=jovem";
             new QRCode(document.getElementById("qrcode"), { text: qrUrl, width: 220, height: 220 });
         }
@@ -195,9 +206,9 @@
 
         function joinGame() {
             const name = document.getElementById('pName').value;
-            if(!name) return alert("Insira seu nome!");
+            if(!name) return alert("Por favor, digite seu nome!");
             db.ref('rooms/'+roomID+'/players/'+state.myId).set({ name, avatar: state.avatar, score: 0 });
-            showView('view-jovem-wait');
+            showView('scr-wait');
         }
 
         function listenForStart() {
@@ -206,80 +217,3 @@
                     db.ref('rooms/'+roomID+'/quiz').once('value', qSnap => {
                         state.questions = qSnap.val();
                         state.idx = snap.val().currentIdx;
-                        startQuiz();
-                    });
-                }
-            });
-        }
-
-        // --- GAMEPLAY ---
-        function startQuiz() {
-            showView('view-quiz');
-            runQ();
-        }
-
-        function runQ() {
-            state.canVote = true;
-            const q = state.questions[state.idx];
-            document.getElementById('qNum').textContent = `Questão ${state.idx+1}/10`;
-            document.getElementById('qText').textContent = q.q;
-            const grid = document.getElementById('qGrid'); grid.innerHTML = '';
-            const colors = ['#e21b3c', '#1368ce', '#d89e00', '#26890c'];
-            q.opts.forEach((o, i) => {
-                grid.innerHTML += `<button class="opt" style="background:${colors[i]}" onclick="vote(${i}, this)">${o}</button>`;
-            });
-
-            let t = 25; const bar = document.getElementById('tBar');
-            const timer = setInterval(() => {
-                t--; bar.style.width = (t/25)*100 + "%";
-                if(t <= 0) { clearInterval(timer); reveal(); }
-            }, 1000);
-            state.activeTimer = timer;
-        }
-
-        function vote(i, btn) {
-            if(!state.canVote) return;
-            state.canVote = false;
-            document.querySelectorAll('.opt').forEach(b => b.style.opacity = "0.3");
-            btn.style.opacity = "1";
-            btn.style.border = "3px solid #fff";
-            if(i === state.questions[state.idx].ans) {
-                db.ref('rooms/'+roomID+'/players/'+state.myId+'/score').transaction(s => (s || 0) + 100);
-            }
-        }
-
-        function reveal() {
-            const correct = state.questions[state.idx].ans;
-            const btns = document.querySelectorAll('.opt');
-            btns[correct].classList.add('reveal-correct');
-            setTimeout(showRanking, 3000);
-        }
-
-        function showRanking() {
-            showView('view-rank');
-            const list = document.getElementById('rankList');
-            db.ref('rooms/'+roomID+'/players').once('value', snap => {
-                const ps = Object.values(snap.val() || {}).sort((a,b) => b.score - a.score);
-                list.innerHTML = ps.map((p, i) => `
-                    <div class="rank-card ${i < 3 ? 'top' : ''}">
-                        <span class="orb" style="width: 40px;">${i+1}º</span>
-                        <span style="font-size: 28px;">${p.avatar}</span>
-                        <span style="flex:1; text-align:left; font-weight:800; margin-left: 10px;">${p.name}</span>
-                        <span class="orb" style="font-size: 22px;">${p.score}</span>
-                    </div>
-                `).join('');
-            });
-        }
-
-        function nextStep() {
-            state.idx++;
-            if(state.idx < 10) {
-                db.ref('rooms/'+roomID+'/status/currentIdx').set(state.idx);
-                runQ();
-            } else {
-                alert("Fim do Quizz!");
-            }
-        }
-    </script>
-</body>
-</html>
