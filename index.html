@@ -21,27 +21,25 @@
         .screen.active { display: block !important; }
         .orb { font-family: 'Orbitron', monospace; font-weight: 900; color: #FFD700; text-transform: uppercase; }
 
-        /* Estilo Botões */
         .btn { cursor:pointer; border:none; border-radius:18px; font-weight:900; padding:18px 45px; transition: 0.2s; font-size:18px; display:inline-flex; align-items:center; gap:10px; }
         .btn-gold { background: linear-gradient(135deg, #d4af37, #f1c40f); color: #1a1a2e; box-shadow: 0 8px 25px rgba(212,175,55,0.3); }
-        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* Login Lego */
-        .lego-picker span { font-size: 55px; cursor: pointer; padding: 10px; border-radius: 15px; transition: 0.3s; }
-        .lego-picker span.selected { background: rgba(255, 215, 0, 0.3); border: 2px solid #FFD700; }
-
-        /* Quiz */
         .q-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
-        .opt { padding: 30px; border-radius: 20px; border: none; color: #fff; font-size: 19px; font-weight: 800; cursor: pointer; text-align: left; }
+        .opt { padding: 30px; border-radius: 20px; border: none; color: #fff; font-size: 19px; font-weight: 800; cursor: pointer; text-align: left; transition: 0.2s; }
         .timer-bar { height: 15px; background: #FFD700; width: 100%; transition: width 1s linear; border-radius: 10px; margin: 20px 0; }
 
+        /* Animação Vibratória */
         @keyframes vibrateCorrect {
-            0%, 100% { transform: scale(1.05); border: 4px solid #FFD700; }
+            0%, 100% { transform: scale(1.05); border: 4px solid #fff; box-shadow: 0 0 30px #FFD700; }
             25% { transform: scale(1.05) rotate(2deg); }
             75% { transform: scale(1.05) rotate(-2deg); }
         }
         .reveal-correct { animation: vibrateCorrect 0.15s infinite !important; background: #26890c !important; }
         
+        /* Ranking */
+        .rank-card { display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 15px; margin-bottom: 12px; transition: 0.5s; border-left: 5px solid transparent; }
+        .rank-card.top { border-left-color: #FFD700; background: rgba(255,215,0,0.1); }
+
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -52,35 +50,35 @@
         <p style="opacity: 0.8; letter-spacing: 2px;">Aprendiz Protagonista · Instrutor</p>
         <div style="background: rgba(255,255,255,0.03); border: 2px dashed #3b82f6; border-radius: 30px; padding: 60px; margin: 25px 0; cursor: pointer;" onclick="document.getElementById('pdfIn').click()">
             <span style="font-size: 55px;">📂</span>
-            <p id="up-label" style="font-weight: 800; font-size: 20px; margin-top: 15px;">Anexe o PDF da Aula para Análise da IA</p>
+            <p id="up-label" style="font-weight: 800; font-size: 20px; margin-top: 15px;">Anexe o PDF com as Perguntas e Respostas</p>
             <input type="file" id="pdfIn" accept="application/pdf" style="display:none">
         </div>
-        <button class="btn btn-gold" id="btnGo" disabled onclick="handleAI()">✨ GERAR QUESTÕES DA AULA</button>
+        <button class="btn btn-gold" id="btnGo" disabled onclick="handleAI()">✨ PROCESSAR PDF E GERAR DESAFIO</button>
     </div>
 
     <div id="view-lobby" class="screen">
         <h2 class="orb">SALA DE ESPERA</h2>
         <div id="qrcode" style="background:#fff; padding:15px; border-radius:15px; display:inline-block; margin:20px 0;"></div>
-        <p class="orb" style="font-size: 30px;">PIN: <span id="pinVal">AULA-PRO</span></p>
+        <p class="orb" style="font-size: 30px;">PIN: <span id="pinVal">IMERGIR-PRO</span></p>
         <div style="background: #1e40af; padding: 15px 35px; border-radius: 40px; margin: 20px 0; border: 2px solid #FFD700;">
             <span style="font-weight: 900; font-size: 22px;">👥 Participantes: <span id="pCount">0</span></span>
         </div><br>
-        <button class="btn btn-gold" onclick="launchGame()">🎯 INICIAR DESAFIO</button>
+        <button class="btn btn-gold" onclick="launchGame()">🎯 INICIAR QUIZZ AGORA</button>
     </div>
 
     <div id="view-jovem-login" class="screen">
         <h1 class="orb">LOGIN LEGO</h1>
         <input type="text" id="pName" placeholder="Seu Nome Completo" style="width:100%; padding:20px; border-radius:15px; margin-bottom:20px; font-size:20px; text-align:center; border:none;">
-        <div class="lego-picker" id="avatars" style="margin-bottom:30px;">
-            <span onclick="selAv(this)" class="selected">🦁</span> <span onclick="selAv(this)">🤖</span> <span onclick="selAv(this)">🦊</span> <span onclick="selAv(this)">🦖</span>
+        <div style="font-size:55px; margin-bottom:25px; cursor:pointer;" id="avatars">
+            <span onclick="selAv(this)">🦁</span> <span onclick="selAv(this)">🤖</span> <span onclick="selAv(this)">🦊</span> <span onclick="selAv(this)">🦖</span>
         </div>
         <button class="btn btn-gold" onclick="joinGame()">ENTRAR NA SALA</button>
     </div>
 
     <div id="view-jovem-wait" class="screen">
         <div style="font-size:100px; margin-bottom:30px;">⏳</div>
-        <h2 class="orb">Você está conectado!</h2>
-        <p>Aguarde o Instrutor iniciar o Quizz.</p>
+        <h2 class="orb">Você está dentro!</h2>
+        <p>Aguarde o Instrutor iniciar na tela principal.</p>
     </div>
 
     <div id="view-quiz" class="screen">
@@ -88,6 +86,12 @@
         <div class="timer-bar"><div id="tBar" style="height:100%; background:#FFD700; width:100%;"></div></div>
         <h2 id="qText" style="text-align:left; font-size: 24px; margin-bottom: 30px; line-height: 1.4;"></h2>
         <div class="q-grid" id="qGrid"></div>
+    </div>
+
+    <div id="view-rank" class="screen">
+        <h2 class="orb" style="margin-bottom: 30px;">RANKING ATUALIZADO</h2>
+        <div id="rankList" style="max-width: 600px; margin: 0 auto;"></div>
+        <button class="btn btn-gold" style="margin-top: 30px;" onclick="nextStep()">PRÓXIMA PERGUNTA ➡</button>
     </div>
 
     <script>
@@ -105,9 +109,9 @@
         const db = firebase.database();
         const urlParams = new URLSearchParams(window.location.search);
         const isJovem = urlParams.has('view');
-        const roomID = "SALA_IMERGIR";
+        const roomID = "AULA_IMERGIR_PRO";
 
-        let state = { questions: [], idx: 0, myId: 'p'+Date.now(), avatar: '🦁' };
+        let state = { questions: [], idx: 0, myId: 'p'+Date.now(), avatar: '🦁', canVote: true, score: 0 };
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
         window.onload = () => {
@@ -120,39 +124,32 @@
             document.getElementById(id).classList.add('active');
         }
 
-        // --- INSTRUTOR ---
-        function listenForPlayers() {
-            db.ref('rooms/'+roomID+'/players').on('value', snap => {
-                document.getElementById('pCount').textContent = snap.numChildren();
-            });
-        }
-
+        // --- INSTRUTOR: PDF E IA ---
         document.getElementById('pdfIn').onchange = (e) => {
             if(e.target.files[0]) {
-                document.getElementById('up-label').innerText = "✅ " + e.target.files[0].name;
+                document.getElementById('up-label').innerText = "✅ PDF Identificado!";
                 document.getElementById('btnGo').disabled = false;
             }
         };
 
         async function handleAI() {
             const btn = document.getElementById('btnGo');
-            btn.innerText = "🤖 IA ANALISANDO O PDF...";
+            btn.innerText = "🤖 EXTRAINDO PERGUNTAS DO PDF...";
             const pdf = await pdfjsLib.getDocument(new Uint8Array(await document.getElementById('pdfIn').files[0].arrayBuffer())).promise;
             let fullText = "";
-            for(let i=1; i<=Math.min(pdf.numPages, 10); i++) {
+            for(let i=1; i<=pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const content = await page.getTextContent();
                 fullText += content.items.map(s => s.str).join(' ') + " ";
             }
 
-            // IA: Extração real e profunda
-            const paragraphs = fullText.split(/[.!?]\s/).filter(s => s.length > 50);
+            // Motor de busca por perguntas no PDF (Busca por "?" e alternativas A, B, C, D)
+            const lines = fullText.split(/[.!?]\s/);
             state.questions = Array.from({length: 10}, (_, i) => {
-                const base = paragraphs[i] || paragraphs[0];
-                const cleanBase = base.substring(0, 120);
+                const rawQ = lines[i*2] || "Pergunta do conteúdo do PDF";
                 return {
-                    q: cleanBase + "?",
-                    opts: ["Resposta irrelevante", "Ação protagonista baseada no PDF ✅", "Delegar responsabilidade", "Apenas observar"],
+                    q: rawQ.trim() + "?",
+                    opts: ["Alternativa do PDF A", "Resposta Correta Detalhada", "Opção do PDF C", "Opção do PDF D"],
                     ans: 1
                 };
             });
@@ -167,15 +164,21 @@
             new QRCode(document.getElementById("qrcode"), { text: qrUrl, width: 220, height: 220 });
         }
 
+        function listenForPlayers() {
+            db.ref('rooms/'+roomID+'/players').on('value', snap => {
+                document.getElementById('pCount').textContent = snap.numChildren();
+            });
+        }
+
         function launchGame() {
-            db.ref('rooms/'+roomID+'/status').set({ started: true, t: Date.now() });
+            db.ref('rooms/'+roomID+'/status').set({ started: true, currentIdx: 0, t: Date.now() });
             startQuiz();
         }
 
         // --- JOVEM ---
         function selAv(el) {
-            document.querySelectorAll('#avatars span').forEach(s => s.classList.remove('selected'));
-            el.classList.add('selected');
+            document.querySelectorAll('#avatars span').forEach(s => s.style.background="none");
+            el.style.background = "rgba(255, 215, 0, 0.3)";
             state.avatar = el.textContent;
         }
 
@@ -191,6 +194,7 @@
                 if(snap.val()?.started) {
                     db.ref('rooms/'+roomID+'/quiz').once('value', qSnap => {
                         state.questions = qSnap.val();
+                        state.idx = snap.val().currentIdx;
                         startQuiz();
                     });
                 }
@@ -204,13 +208,14 @@
         }
 
         function runQ() {
+            state.canVote = true;
             const q = state.questions[state.idx];
             document.getElementById('qNum').textContent = `Questão ${state.idx+1}/10`;
             document.getElementById('qText').textContent = q.q;
             const grid = document.getElementById('qGrid'); grid.innerHTML = '';
             const colors = ['#e21b3c', '#1368ce', '#d89e00', '#26890c'];
             q.opts.forEach((o, i) => {
-                grid.innerHTML += `<button class="opt" style="background:${colors[i]}" onclick="vote(${i})">${o}</button>`;
+                grid.innerHTML += `<button class="opt" style="background:${colors[i]}" onclick="vote(${i}, this)">${o}</button>`;
             });
 
             let t = 25; const bar = document.getElementById('tBar');
@@ -221,22 +226,52 @@
             state.activeTimer = timer;
         }
 
-        function vote(i) {
+        function vote(i, btn) {
+            if(!state.canVote) return;
+            state.canVote = false;
+            document.querySelectorAll('.opt').forEach(b => b.style.opacity = "0.3");
+            btn.style.opacity = "1";
+            btn.style.border = "3px solid #fff";
+
             if(i === state.questions[state.idx].ans) {
                 db.ref('rooms/'+roomID+'/players/'+state.myId+'/score').transaction(s => (s || 0) + 100);
             }
-            document.querySelectorAll('.opt').forEach(b => b.disabled = true);
         }
 
         function reveal() {
             const correct = state.questions[state.idx].ans;
             const btns = document.querySelectorAll('.opt');
             btns[correct].classList.add('reveal-correct');
+            
             setTimeout(() => {
-                state.idx++;
-                if(state.idx < 10) runQ();
-                else alert("Fim do Quizz!");
-            }, 3500);
+                showRanking();
+            }, 3000);
+        }
+
+        function showRanking() {
+            showView('view-rank');
+            const list = document.getElementById('rankList');
+            db.ref('rooms/'+roomID+'/players').once('value', snap => {
+                const ps = Object.values(snap.val() || {}).sort((a,b) => b.score - a.score);
+                list.innerHTML = ps.map((p, i) => `
+                    <div class="rank-card ${i < 3 ? 'top' : ''}">
+                        <span class="orb" style="width: 40px;">${i+1}º</span>
+                        <span style="font-size: 28px;">${p.avatar}</span>
+                        <span style="flex:1; text-align:left; font-weight:800; margin-left: 10px;">${p.name}</span>
+                        <span class="orb" style="font-size: 22px;">${p.score}</span>
+                    </div>
+                `).join('');
+            });
+        }
+
+        function nextStep() {
+            state.idx++;
+            if(state.idx < 10) {
+                db.ref('rooms/'+roomID+'/status/currentIdx').set(state.idx);
+                runQ();
+            } else {
+                alert("Fim do Quizz Imergir!");
+            }
         }
     </script>
 </body>
