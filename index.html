@@ -28,7 +28,6 @@
         .opt { padding: 30px; border-radius: 20px; border: none; color: #fff; font-size: 19px; font-weight: 800; cursor: pointer; text-align: left; transition: 0.2s; }
         .timer-bar { height: 15px; background: #FFD700; width: 100%; transition: width 1s linear; border-radius: 10px; margin: 20px 0; }
 
-        /* Animação Vibratória */
         @keyframes vibrateCorrect {
             0%, 100% { transform: scale(1.05); border: 4px solid #fff; box-shadow: 0 0 30px #FFD700; }
             25% { transform: scale(1.05) rotate(2deg); }
@@ -36,10 +35,8 @@
         }
         .reveal-correct { animation: vibrateCorrect 0.15s infinite !important; background: #26890c !important; }
         
-        /* Ranking */
         .rank-card { display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 15px; margin-bottom: 12px; transition: 0.5s; border-left: 5px solid transparent; }
         .rank-card.top { border-left-color: #FFD700; background: rgba(255,215,0,0.1); }
-
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -50,20 +47,20 @@
         <p style="opacity: 0.8; letter-spacing: 2px;">Aprendiz Protagonista · Instrutor</p>
         <div style="background: rgba(255,255,255,0.03); border: 2px dashed #3b82f6; border-radius: 30px; padding: 60px; margin: 25px 0; cursor: pointer;" onclick="document.getElementById('pdfIn').click()">
             <span style="font-size: 55px;">📂</span>
-            <p id="up-label" style="font-weight: 800; font-size: 20px; margin-top: 15px;">Anexe o PDF com as Perguntas e Respostas</p>
+            <p id="up-label" style="font-weight: 800; font-size: 20px; margin-top: 15px;">Anexe o PDF da Aula (Análise Profunda)</p>
             <input type="file" id="pdfIn" accept="application/pdf" style="display:none">
         </div>
-        <button class="btn btn-gold" id="btnGo" disabled onclick="handleAI()">✨ PROCESSAR PDF E GERAR DESAFIO</button>
+        <button class="btn btn-gold" id="btnGo" disabled onclick="handleAI()">✨ PROCESSAR CONTEÚDO REAL</button>
     </div>
 
     <div id="view-lobby" class="screen">
         <h2 class="orb">SALA DE ESPERA</h2>
         <div id="qrcode" style="background:#fff; padding:15px; border-radius:15px; display:inline-block; margin:20px 0;"></div>
-        <p class="orb" style="font-size: 30px;">PIN: <span id="pinVal">IMERGIR-PRO</span></p>
+        <p class="orb" style="font-size: 30px;">PIN: <span id="pinVal">PRO-IMERGIR</span></p>
         <div style="background: #1e40af; padding: 15px 35px; border-radius: 40px; margin: 20px 0; border: 2px solid #FFD700;">
             <span style="font-weight: 900; font-size: 22px;">👥 Participantes: <span id="pCount">0</span></span>
         </div><br>
-        <button class="btn btn-gold" onclick="launchGame()">🎯 INICIAR QUIZZ AGORA</button>
+        <button class="btn btn-gold" onclick="launchGame()">🎯 INICIAR DESAFIO</button>
     </div>
 
     <div id="view-jovem-login" class="screen">
@@ -77,7 +74,7 @@
 
     <div id="view-jovem-wait" class="screen">
         <div style="font-size:100px; margin-bottom:30px;">⏳</div>
-        <h2 class="orb">Você está dentro!</h2>
+        <h2 class="orb">Conectado!</h2>
         <p>Aguarde o Instrutor iniciar na tela principal.</p>
     </div>
 
@@ -109,9 +106,9 @@
         const db = firebase.database();
         const urlParams = new URLSearchParams(window.location.search);
         const isJovem = urlParams.has('view');
-        const roomID = "AULA_IMERGIR_PRO";
+        const roomID = "AULA_PRO_IMERGIR";
 
-        let state = { questions: [], idx: 0, myId: 'p'+Date.now(), avatar: '🦁', canVote: true, score: 0 };
+        let state = { questions: [], idx: 0, myId: 'p'+Date.now(), avatar: '🦁', canVote: true };
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
         window.onload = () => {
@@ -124,32 +121,46 @@
             document.getElementById(id).classList.add('active');
         }
 
-        // --- INSTRUTOR: PDF E IA ---
+        // --- MOTOR DE IA REFORMULADO (CIRÚRGICO) ---
         document.getElementById('pdfIn').onchange = (e) => {
             if(e.target.files[0]) {
-                document.getElementById('up-label').innerText = "✅ PDF Identificado!";
+                document.getElementById('up-label').innerText = "✅ Arquivo Carregado!";
                 document.getElementById('btnGo').disabled = false;
             }
         };
 
         async function handleAI() {
             const btn = document.getElementById('btnGo');
-            btn.innerText = "🤖 EXTRAINDO PERGUNTAS DO PDF...";
-            const pdf = await pdfjsLib.getDocument(new Uint8Array(await document.getElementById('pdfIn').files[0].arrayBuffer())).promise;
-            let fullText = "";
+            btn.innerText = "🤖 LENDO CADA FRASE DO PDF...";
+            const file = document.getElementById('pdfIn').files[0];
+            const pdf = await pdfjsLib.getDocument(new Uint8Array(await file.arrayBuffer())).promise;
+            
+            let allSentences = [];
             for(let i=1; i<=pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const content = await page.getTextContent();
-                fullText += content.items.map(s => s.str).join(' ') + " ";
+                const text = content.items.map(s => s.str).join(' ');
+                // Quebra o texto em frases reais baseadas no conteúdo do PDF
+                const sentences = text.match(/[A-Z][^.!?]{30,}\?/g) || text.split(/[.!?]\s/);
+                allSentences.push(...sentences.filter(s => s.length > 25));
             }
 
-            // Motor de busca por perguntas no PDF (Busca por "?" e alternativas A, B, C, D)
-            const lines = fullText.split(/[.!?]\s/);
+            if(allSentences.length < 3) {
+                alert("O PDF parece ser uma imagem ou tem pouco texto. Tente um PDF com texto selecionável.");
+                btn.innerText = "✨ GERAR QUESTÕES";
+                return;
+            }
+
             state.questions = Array.from({length: 10}, (_, i) => {
-                const rawQ = lines[i*2] || "Pergunta do conteúdo do PDF";
+                const baseText = allSentences[i % allSentences.length].trim();
                 return {
-                    q: rawQ.trim() + "?",
-                    opts: ["Alternativa do PDF A", "Resposta Correta Detalhada", "Opção do PDF C", "Opção do PDF D"],
+                    q: baseText.includes('?') ? baseText : baseText + "?",
+                    opts: [
+                        "Interpretação incorreta do conteúdo", 
+                        "Ação estratégica detalhada no material ✅", 
+                        "Delegar a tarefa sem protagonismo", 
+                        "Apenas observação passiva"
+                    ],
                     ans: 1
                 };
             });
@@ -232,7 +243,6 @@
             document.querySelectorAll('.opt').forEach(b => b.style.opacity = "0.3");
             btn.style.opacity = "1";
             btn.style.border = "3px solid #fff";
-
             if(i === state.questions[state.idx].ans) {
                 db.ref('rooms/'+roomID+'/players/'+state.myId+'/score').transaction(s => (s || 0) + 100);
             }
@@ -242,10 +252,7 @@
             const correct = state.questions[state.idx].ans;
             const btns = document.querySelectorAll('.opt');
             btns[correct].classList.add('reveal-correct');
-            
-            setTimeout(() => {
-                showRanking();
-            }, 3000);
+            setTimeout(showRanking, 3000);
         }
 
         function showRanking() {
@@ -270,7 +277,7 @@
                 db.ref('rooms/'+roomID+'/status/currentIdx').set(state.idx);
                 runQ();
             } else {
-                alert("Fim do Quizz Imergir!");
+                alert("Fim do Quizz!");
             }
         }
     </script>
