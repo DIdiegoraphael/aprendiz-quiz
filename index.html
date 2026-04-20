@@ -3,53 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quizz Imergir - Aprendiz Protagonista</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <title>Quizz Imergir</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
         *{box-sizing:border-box; margin:0; padding:0}
-        body{ font-family:'Nunito', sans-serif; background: radial-gradient(circle at 50% 50%, #0d1b3e, #050a1d); color:#fff; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
-        .screen { display: none; width:100%; max-width:850px; text-align:center; }
+        body{ font-family:'Nunito', sans-serif; background:#050a1d; color:#fff; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+        .screen { display: none; width:100%; max-width:700px; text-align:center; }
         .screen.active { display: block !important; }
-        .orb { font-family: 'Orbitron', monospace; font-weight: 900; color: #FFD700; text-transform: uppercase; }
-        .btn { cursor:pointer; border:none; border-radius:18px; font-weight:900; padding:18px 45px; transition: 0.2s; font-size:18px; }
-        .btn-gold { background: linear-gradient(135deg, #d4af37, #f1c40f); color: #1a1a2e; }
-        .timer-container { width: 100%; background: rgba(255,255,255,0.1); height: 20px; border-radius: 10px; margin: 20px 0; border: 2px solid #FFD700; overflow: hidden; }
+        .orb { font-family: 'Orbitron', sans-serif; font-weight: 900; color: #FFD700; }
+        .btn { cursor:pointer; border:none; border-radius:15px; font-weight:900; padding:18px 40px; font-size:18px; background: linear-gradient(135deg, #d4af37, #f1c40f); color: #1a1a2e; margin-top:20px; }
+        .timer-container { width: 100%; background: rgba(255,255,255,0.1); height: 20px; border-radius: 10px; margin: 20px 0; overflow: hidden; border: 2px solid #FFD700; }
         #tBar { height: 100%; background: #FFD700; width: 100%; transition: width 1s linear; }
-        .q-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
-        .opt { padding: 30px; border-radius: 20px; border: none; color: #fff; font-size: 19px; font-weight: 800; cursor: pointer; text-align: left; }
-        @keyframes vibrate { 0%, 100% { transform: scale(1.05); } 25% { transform: rotate(1deg); } 75% { transform: rotate(-1deg); } }
-        .reveal-correct { animation: vibrate 0.1s infinite; background: #26890c !important; border: 4px solid #fff !important; }
-        .rank-card { display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 15px; margin-bottom: 12px; border-left: 5px solid #FFD700; }
+        .q-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
+        .opt { padding: 20px; border-radius: 15px; border: none; color: #fff; font-size: 18px; font-weight: 700; cursor: pointer; text-align: left; }
+        .correct { background: #26890c !important; border: 3px solid #fff !important; animation: pulse 0.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        .rank-card { display: flex; justify-content: space-between; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 8px; border-left: 4px solid #FFD700; }
     </style>
 </head>
 <body>
 
-    <div id="view-lobby" class="screen active">
-        <h1 class="orb">Quizz Imergir</h1>
-        <div id="qrcode" style="background:#fff; padding:15px; border-radius:15px; display:inline-block; margin:20px 0;"></div>
-        <p class="orb" style="font-size: 30px;">PIN: <span id="pin">AULA-HOJE</span></p>
-        <p style="margin: 15px 0; font-size: 20px;">Participantes: <span id="pCount">0</span></p>
-        <button class="btn btn-gold" onclick="startGlobal()">🎯 INICIAR JOGO</button>
+    <div id="scr-lobby" class="screen active">
+        <h1 class="orb">QUIZZ IMERGIR</h1>
+        <div id="qrcode" style="background:#fff; padding:10px; border-radius:10px; display:inline-block; margin:20px 0;"></div>
+        <p style="font-size: 20px; margin-bottom: 10px;">Acesse pelo QR Code ou Link</p>
+        <input type="text" id="pName" placeholder="Seu Nome" style="padding:15px; border-radius:10px; width:80%; border:none; text-align:center; margin-bottom:10px;"><br>
+        <button class="btn" onclick="register()">ENTRAR NO JOGO</button>
+        <div id="admin-area" style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
+            <p>Aguardando: <b id="pCount">0</b> participantes</p>
+            <button class="btn" onclick="startQuiz()">INICIAR QUIZZ (Instrutor)</button>
+        </div>
     </div>
 
-    <div id="view-quiz" class="screen">
-        <div id="qNum" class="orb">Questão 1</div>
+    <div id="scr-quiz" class="screen">
+        <h2 id="qTitle" class="orb" style="font-size:20px; margin-bottom:10px;">Questão</h2>
         <div class="timer-container"><div id="tBar"></div></div>
-        <h2 id="qText" style="text-align:left; margin-bottom: 25px; font-size: 24px;"></h2>
+        <h3 id="qText" style="font-size:22px; margin-bottom:20px; text-align:left;"></h3>
         <div class="q-grid" id="qGrid"></div>
     </div>
 
-    <div id="view-rank" class="screen">
-        <h2 class="orb" style="margin-bottom: 25px;">RANKING</h2>
+    <div id="scr-rank" class="screen">
+        <h2 class="orb" style="margin-bottom:20px;">RANKING</h2>
         <div id="rankList"></div>
-        <button class="btn btn-gold" style="margin-top:20px;" onclick="toNext()">PRÓXIMA ➡</button>
+        <button class="btn" onclick="nextQuestion()">PRÓXIMA QUESTÃO</button>
     </div>
 
     <script>
-        // --- CONFIGURAÇÕES FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyCzVzw3e7pgBC89RlndUDh-03uk_2Vevdg",
             authDomain: "quizzprotagonista.firebaseapp.com",
@@ -61,42 +63,51 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const room = "SALA_IMERGE_FIXA";
+        const room = "SALA_DEFINITIVA";
 
-        // --- QUESTÕES AQUI: EDITE APENAS ESTE BLOCO ---
-        const minhasQuestoes = [
+        // --- SUAS QUESTÕES AQUI: COPIE E COLE DO SEU PDF ---
+        const questoes = [
             {
-                q: "Qual o foco principal do atendimento protagonista?",
-                opts: ["Apenas vender", "Resolver o problema com empatia", "Seguir o script", "Ignorar o cliente"],
-                ans: 1 // Resposta correta (0, 1, 2 ou 3)
+                q: "Qual a primeira pergunta do seu PDF?",
+                opts: ["Resposta A", "Resposta B (Correta)", "Resposta C", "Resposta D"],
+                ans: 1 // 0=A, 1=B, 2=C, 3=D
             },
             {
-                q: "Pergunta 2 do seu PDF aqui?",
-                opts: ["Opção 1", "Opção 2", "Opção 3", "Opção 4"],
-                ans: 0
+                q: "Qual a segunda pergunta do seu PDF?",
+                opts: ["Opção 1", "Opção 2", "Opção 3 (Correta)", "Opção 4"],
+                ans: 2
             },
-            // Adicione as outras 8 aqui seguindo o modelo acima
+            // Pode adicionar quantas quiser seguindo este formato
         ];
 
-        let state = { questions: minhasQuestoes, idx: 0, timer: null };
+        let state = { idx: 0, myId: 'p'+Date.now(), score: 0, timer: null };
 
-        // Lógica de Lobby
         window.onload = () => {
-            const qrUrl = window.location.href + "?view=jovem";
-            new QRCode(document.getElementById("qrcode"), { text: qrUrl, width: 200, height: 200 });
-            db.ref('rooms/'+room+'/players').on('value', s => document.getElementById('pCount').textContent = s.numChildren());
+            new QRCode(document.getElementById("qrcode"), { text: window.location.href, width: 150, height: 150 });
+            db.ref('rooms/'+room+'/players').on('value', s => {
+                document.getElementById('pCount').textContent = s.numChildren();
+            });
+            db.ref('rooms/'+room+'/status').on('value', s => {
+                if(s.val()?.started) loadQuiz();
+            });
         };
 
-        function startGlobal() {
-            db.ref('rooms/'+room+'/status').set({ started: true, t: Date.now() });
-            run();
+        function register() {
+            const name = document.getElementById('pName').value;
+            if(!name) return alert("Digite seu nome!");
+            db.ref('rooms/'+room+'/players/'+state.myId).set({ name: name, score: 0 });
+            document.getElementById('scr-lobby').innerHTML = "<h1>Conectado!</h1><p>Olhe para a tela do instrutor.</p>";
         }
 
-        function run() {
+        function startQuiz() {
+            db.ref('rooms/'+room+'/status').set({ started: true });
+        }
+
+        function loadQuiz() {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('view-quiz').classList.add('active');
-            const q = state.questions[state.idx];
-            document.getElementById('qNum').textContent = `Questão ${state.idx+1}/${state.questions.length}`;
+            document.getElementById('scr-quiz').classList.add('active');
+            const q = questoes[state.idx];
+            document.getElementById('qTitle').textContent = `Questão ${state.idx+1}/${questoes.length}`;
             document.getElementById('qText').textContent = q.q;
             const grid = document.getElementById('qGrid');
             grid.innerHTML = '';
@@ -105,39 +116,42 @@
                 grid.innerHTML += `<button class="opt" style="background:${colors[i]}" onclick="vote(${i})">${o}</button>`;
             });
 
-            let t = 25; const bar = document.getElementById('tBar');
+            let t = 20;
+            const bar = document.getElementById('tBar');
             bar.style.width = "100%";
-            clearInterval(state.timer);
             state.timer = setInterval(() => {
-                t--; bar.style.width = (t/25)*100 + "%";
+                t--;
+                bar.style.width = (t/20)*100 + "%";
                 if(t <= 0) { clearInterval(state.timer); reveal(); }
             }, 1000);
         }
 
+        function vote(i) {
+            if(i === questoes[state.idx].ans) state.score += 100;
+            document.querySelectorAll('.opt').forEach(b => b.disabled = true);
+        }
+
         function reveal() {
-            const correct = state.questions[state.idx].ans;
-            document.querySelectorAll('.opt')[correct].classList.add('reveal-correct');
+            const correct = questoes[state.idx].ans;
+            document.querySelectorAll('.opt')[correct].classList.add('correct');
+            db.ref('rooms/'+room+'/players/'+state.myId+'/score').set(state.score);
             setTimeout(showRank, 3000);
         }
 
         function showRank() {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('view-rank').classList.add('active');
-            db.ref('rooms/'+room+'/players').once('value', snap => {
-                const ps = Object.values(snap.val() || {}).sort((a,b) => b.score - a.score);
-                document.getElementById('rankList').innerHTML = ps.map((p, i) => `
-                    <div class="rank-card">
-                        <span class="orb">${i+1}º</span>
-                        <span style="flex:1; margin-left:15px; font-weight:800;">${p.name}</span>
-                        <span class="orb">${p.score} pts</span>
-                    </div>
+            document.getElementById('scr-rank').classList.add('active');
+            db.ref('rooms/'+room+'/players').once('value', s => {
+                const ps = Object.values(s.val() || {}).sort((a,b) => b.score - a.score);
+                document.getElementById('rankList').innerHTML = ps.map(p => `
+                    <div class="rank-card"><span>${p.name}</span><span>${p.score} pts</span></div>
                 `).join('');
             });
         }
 
-        function toNext() {
+        function nextQuestion() {
             state.idx++;
-            if(state.idx < state.questions.length) run(); else alert("Fim do Quiz!");
+            if(state.idx < questoes.length) loadQuiz(); else alert("Fim!");
         }
     </script>
 </body>
