@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-/* --- Identidade Visual: Azul Profundo & Amarelo Ouro --- */
+/* --- Identidade Visual Premium --- */
 *{box-sizing:border-box;margin:0;padding:0}
 body{
     font-family:'Nunito',sans-serif;
@@ -19,67 +19,69 @@ body{
 .screen.active{display:block}
 .orb{font-family:'Orbitron',monospace;font-weight:900}
 
-/* Botões Gamificados */
+/* Botões */
 .btn{cursor:pointer; border:none; border-radius:15px; font-weight:900; transition:all 0.2s; display:inline-flex; align-items:center; justify-content:center; gap:10px}
-.btn-gold{background:linear-gradient(135deg,#d4af37, #f1c40f); color:#1a1a2e; padding:18px 40px; font-size:18px}
+.btn-gold{background:linear-gradient(135deg,#d4af37, #f1c40f); color:#1a1a2e; padding:18px 40px; font-size:18px; box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3)}
 .btn-blue{background:linear-gradient(135deg,#1e40af, #3b82f6); color:#fff; padding:15px 30px}
 .btn:disabled{opacity:0.4; cursor:not-allowed}
 
 /* --- Área de Upload --- */
 .upload-card{
     background: rgba(255,255,255,0.03); border: 2px dashed #3b82f6; border-radius: 25px;
-    padding: 60px 40px; margin-bottom: 25px; transition: 0.3s;
+    padding: 60px 40px; margin-bottom: 25px; transition: 0.3s; cursor: pointer;
 }
 .upload-card.ready{border-color:#FFD700; background: rgba(255,215,0,0.05)}
 
-/* --- Quiz UI (Estilo Kahoot/Flora Alves) --- */
+/* --- QR CODE CENTRALIZADO --- */
+#qrcode-container {
+    background:#fff; 
+    padding:25px; 
+    border-radius:25px; 
+    display:inline-flex; 
+    align-items:center; 
+    justify-content:center;
+    margin:25px 0;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+    min-width: 250px;
+    min-height: 250px;
+}
+#qrcode img { 
+    display: block;
+    margin: 0 auto;
+}
+
+/* --- Quiz & Timer --- */
 .q-grid{display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:20px}
-.opt{padding:25px; border-radius:18px; border:none; color:#fff; font-size:20px; font-weight:800; text-align:left; cursor:pointer; position:relative; overflow:hidden}
+.opt{padding:25px; border-radius:18px; border:none; color:#fff; font-size:20px; font-weight:800; text-align:left; cursor:pointer}
 .timer-container{width:100%; height:12px; background:rgba(255,255,255,0.1); border-radius:6px; margin:20px 0}
 .timer-bar{height:100%; background:#FFD700; width:100%; transition: width 1s linear}
 
-/* --- Ranking Dinâmico --- */
-.rank-list{margin-top:20px; text-align:left}
-.rank-item{
-    display:flex; align-items:center; gap:15px; padding:12px; background:rgba(255,255,255,0.05); 
-    border-radius:12px; margin-bottom:8px; border:1px solid transparent; transition: all 0.5s;
-}
-.rank-item.top{border-color:#FFD700; background:rgba(255,215,0,0.1)}
-
-/* --- Pódio Lego Olímpico --- */
+/* --- Ranking & Pódio --- */
+.rank-item{display:flex; align-items:center; gap:15px; padding:12px; background:rgba(255,255,255,0.05); border-radius:12px; margin-bottom:8px}
 .podium-area{display:flex; align-items:flex-end; justify-content:center; gap:15px; height:400px; margin-top:30px}
-.lego-guy{width:80px; text-align:center; position:relative}
-.medal{position:absolute; top:40px; left:50%; transform:translateX(-50%); font-size:24px; z-index:2}
-.block{width:140px; display:flex; align-items:center; justify-content:center; font-size:45px; font-weight:900; color:rgba(0,0,0,0.2); border-radius:12px 12px 0 0}
+.block{width:140px; border-radius:12px 12px 0 0; display:flex; align-items:center; justify-content:center; font-size:45px; color:rgba(0,0,0,0.2)}
 .p1 .block{height:220px; background:linear-gradient(#FFD700, #B8860B)}
 .p2 .block{height:160px; background:linear-gradient(#C0C0C0, #707070)}
 .p3 .block{height:110px; background:linear-gradient(#CD7F32, #8B4513)}
 
 @keyframes fadeUp{from{opacity:0; transform:translateY(20px)}to{opacity:1; transform:translateY(0)}}
-
-/* Estilo do Container do QR */
-#qrcode-container {
-    background:#fff; padding:15px; border-radius:20px; display:inline-block; margin:20px 0;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-#qrcode img { margin: 0 auto; }
 </style>
 </head>
 <body>
 
 <div id="screen-instructor" class="screen active">
-    <h1 class="orb" style="color:#FFD700; font-size:48px">Aprendiz Quiz</h1>
-    <p style="opacity:0.7; margin-bottom:30px">Fase <b>IMERGIR</b> · Metodologia Aprendiz Protagonista</p>
+    <h1 class="orb" style="color:#FFD700; font-size:48px; text-transform:uppercase">Aprendiz Quiz</h1>
+    <p style="opacity:0.7; margin-bottom:30px; letter-spacing:1px">Fase <b>IMERGIR</b> · Metodologia Aprendiz Protagonista</p>
     
     <div class="upload-card" id="dropZone">
         <div id="upload-ui">
-            <div style="font-size:60px">📂</div>
-            <p style="font-weight:900; font-size:22px; margin-top:10px">Anexe sua apresentação aqui</p>
+            <div style="font-size:60px; margin-bottom:15px">📂</div>
+            <p style="font-weight:900; font-size:22px">Anexe sua apresentação aqui</p>
             <p style="font-size:14px; opacity:0.5">PDF ou PPTX da aula</p>
         </div>
         <div id="ready-ui" style="display:none">
             <div style="font-size:60px">✅</div>
-            <p id="file-name" style="color:#FFD700; font-weight:800"></p>
+            <p id="file-name" style="color:#FFD700; font-weight:800; font-size:18px"></p>
         </div>
         <input type="file" id="fileIn" style="display:none">
     </div>
@@ -88,17 +90,17 @@ body{
 </div>
 
 <div id="screen-lobby" class="screen">
-    <h2 class="orb" style="color:#FFD700">SALA DE IMERSÃO</h2>
+    <h2 class="orb" style="color:#FFD700; font-size:32px">SALA DE IMERSÃO</h2>
     <div id="qrcode-container">
         <div id="qrcode"></div>
     </div>
-    <p class="orb" style="font-size:30px; letter-spacing:5px">PIN: <span id="pin">--- ---</span></p>
-    <div id="playerCount" style="margin:20px 0; font-weight:800; color:#3b82f6">0 aprendizes conectados...</div>
+    <p class="orb" style="font-size:34px; letter-spacing:6px; margin-bottom:10px">PIN: <span id="pin">331301</span></p>
+    <div id="playerCount" style="margin-bottom:25px; font-weight:800; color:#3b82f6; font-size:18px">0 aprendizes conectados...</div>
     <button class="btn btn-gold" onclick="startQuiz()">🎯 INICIAR JOGO</button>
 </div>
 
 <div id="screen-quiz" class="screen">
-    <div id="qCounter" class="orb" style="color:#3b82f6; margin-bottom:10px">Questão 1/10</div>
+    <div id="qCounter" class="orb" style="color:#3b82f6">Questão 1/10</div>
     <div class="timer-container"><div id="tBar" class="timer-bar"></div></div>
     <h2 id="qText" style="font-size:28px; margin:20px 0; text-align:left"></h2>
     <div class="q-grid" id="qGrid"></div>
@@ -106,7 +108,7 @@ body{
 
 <div id="screen-rank" class="screen">
     <h2 class="orb" style="color:#FFD700">RANKING DA RODADA</h2>
-    <div id="rankingList" class="rank-list"></div>
+    <div id="rankingList" style="margin-top:20px"></div>
     <button class="btn btn-blue" style="margin-top:30px" onclick="nextQuestion()">PRÓXIMA PERGUNTA ➡</button>
 </div>
 
@@ -114,31 +116,27 @@ body{
     <h1 class="orb" style="color:#FFD700; font-size:40px">PÓDIO FINAL</h1>
     <div class="podium-area">
         <div class="p2 lego-guy">
-            <div class="medal">🥈</div>
-            <div style="font-size:40px">👤</div>
-            <div id="name2" style="font-size:12px; margin-bottom:5px">--</div>
-            <div class="block">2º</div>
+            <div style="font-size:40px; margin-bottom:10px">👤</div>
+            <div id="name2" style="font-size:14px; margin-bottom:5px">--</div>
+            <div class="block">🥈</div>
         </div>
         <div class="p1 lego-guy">
-            <div class="medal">🥇</div>
-            <div style="font-size:60px">👑</div>
+            <div style="font-size:60px; margin-bottom:10px">👑</div>
             <div id="name1" style="font-weight:900; color:#FFD700; margin-bottom:5px">--</div>
-            <div class="block">1º</div>
+            <div class="block">🥇</div>
         </div>
         <div class="p3 lego-guy">
-            <div class="medal">🥉</div>
-            <div style="font-size:40px">👤</div>
-            <div id="name3" style="font-size:12px; margin-bottom:5px">--</div>
-            <div class="block">3º</div>
+            <div style="font-size:40px; margin-bottom:10px">👤</div>
+            <div id="name3" style="font-size:14px; margin-bottom:5px">--</div>
+            <div class="block">🥉</div>
         </div>
     </div>
     <button class="btn btn-gold" style="margin-top:40px" onclick="location.reload()">REINICIAR EXPERIÊNCIA</button>
 </div>
 
 <script>
-// --- Lógica de Gamificação & IA ---
 let players = [
-    {name: "Diego (Você)", score: 0, avatar: "🦁", lastTime: 0, lastCorrect: false},
+    {name: "Diego", score: 0, avatar: "🦁", lastTime: 0, lastCorrect: false},
     {name: "Aprendiz Beta", score: 0, avatar: "🤖", lastTime: 0, lastCorrect: false},
     {name: "Aprendiz Gama", score: 0, avatar: "🦊", lastTime: 0, lastCorrect: false}
 ];
@@ -146,10 +144,13 @@ let quiz = [];
 let currentIdx = 0;
 let timer;
 
-document.getElementById('dropZone').onclick = () => document.getElementById('fileIn').click();
-document.getElementById('fileIn').onchange = (e) => {
+// Upload logic
+const dropZone = document.getElementById('dropZone');
+const fileIn = document.getElementById('fileIn');
+dropZone.onclick = () => fileIn.click();
+fileIn.onchange = (e) => {
     if(e.target.files[0]) {
-        document.getElementById('dropZone').classList.add('ready');
+        dropZone.classList.add('ready');
         document.getElementById('upload-ui').style.display = 'none';
         document.getElementById('ready-ui').style.display = 'block';
         document.getElementById('file-name').textContent = e.target.files[0].name;
@@ -161,36 +162,37 @@ function simulateAI() {
     const btn = document.getElementById('btnAI');
     btn.innerHTML = "🧠 AGENTE IA ANALISANDO SLIDES...";
     btn.disabled = true;
-
     setTimeout(() => {
         for(let i=1; i<=10; i++) {
             quiz.push({
-                q: `Pergunta de Imergir #${i}: Baseado no slide anexado, qual o ponto crítico?`,
-                opts: ["Opção Errada A", "Opção Correta ✅", "Opção Errada C", "Opção Errada D"],
+                q: `Questão ${i}: De acordo com a apresentação, qual a base da fase IMERGIR?`,
+                opts: ["Inércia", "Empatia e Pesquisa ✅", "Execução sem plano", "Finalização imediata"],
                 ans: 1
             });
         }
         showLobby();
-    }, 2000);
+    }, 1800);
 }
 
 function showLobby() {
     document.getElementById('screen-instructor').classList.remove('active');
     document.getElementById('screen-lobby').classList.add('active');
-    const pin = Math.floor(100000 + Math.random() * 900000);
-    document.getElementById('pin').textContent = pin;
     
-    // GERAR QR CODE REAL
+    // Gerar QR Code Real e Centralizado
     const qrContainer = document.getElementById("qrcode");
-    qrContainer.innerHTML = ""; // Limpa antes de gerar
-    new QRCode(qrContainer, {
-        text: window.location.href + "?room=" + pin,
-        width: 200,
-        height: 200,
-        colorDark: "#050a1d",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-    });
+    qrContainer.innerHTML = ""; 
+    
+    // Pequeno delay para garantir que o container esteja visível antes do desenho
+    setTimeout(() => {
+        new QRCode(qrContainer, {
+            text: window.location.href,
+            width: 200,
+            height: 200,
+            colorDark: "#050a1d",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    }, 100);
 }
 
 function startQuiz() {
@@ -205,12 +207,10 @@ function loadQuestion() {
     document.getElementById('qText').textContent = q.q;
     const grid = document.getElementById('qGrid');
     grid.innerHTML = '';
-    
     const colors = ['#e21b3c', '#1368ce', '#d89e00', '#26890c'];
     q.opts.forEach((o, i) => {
         grid.innerHTML += `<button class="opt" style="background:${colors[i]}" onclick="answer(${i})">${o}</button>`;
     });
-
     startTimer();
 }
 
@@ -218,7 +218,6 @@ function startTimer() {
     let timeLeft = 25;
     const bar = document.getElementById('tBar');
     bar.style.width = "100%";
-    
     clearInterval(timer);
     timer = setInterval(() => {
         timeLeft--;
@@ -229,36 +228,29 @@ function startTimer() {
 
 function answer(idx) {
     clearInterval(timer);
-    const barWidth = parseFloat(document.getElementById('tBar').style.width);
-    const timeUsed = 25 - (barWidth/4);
-    
+    const timeUsed = 25 - (parseFloat(document.getElementById('tBar').style.width)/4);
     players[0].lastCorrect = (idx === quiz[currentIdx].ans);
     players[0].lastTime = timeUsed;
-    
     players[1].lastCorrect = Math.random() > 0.4;
     players[1].lastTime = Math.random() * 25;
     players[2].lastCorrect = Math.random() > 0.5;
     players[2].lastTime = Math.random() * 25;
-
     showRanking();
 }
 
 function showRanking() {
     players.forEach(p => {
         if(p.lastCorrect) p.score += Math.round((25 - p.lastTime) * 100);
-        else p.score -= Math.round(p.lastTime * 10);
+        else p.score -= 50;
     });
-
     players.sort((a,b) => b.score - a.score);
-
     document.getElementById('screen-quiz').classList.remove('active');
     document.getElementById('screen-rank').classList.add('active');
-
     const list = document.getElementById('rankingList');
     list.innerHTML = players.map((p, i) => `
-        <div class="rank-item ${i===0?'top':''}">
+        <div class="rank-item" style="${i===0?'border:1px solid #FFD700; background:rgba(255,215,0,0.1)':''}">
             <span class="orb">${i+1}º</span>
-            <span style="font-size:24px">${p.avatar}</span>
+            <span>${p.avatar}</span>
             <span style="flex:1; font-weight:800">${p.name}</span>
             <span class="orb" style="color:#FFD700">${p.score} pts</span>
         </div>
@@ -279,7 +271,6 @@ function nextQuestion() {
 function showFinalPodium() {
     document.getElementById('screen-rank').classList.remove('active');
     document.getElementById('screen-podium').classList.add('active');
-    
     document.getElementById('name1').textContent = players[0].name;
     document.getElementById('name2').textContent = players[1].name;
     document.getElementById('name3').textContent = players[2].name;
