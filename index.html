@@ -1,11 +1,11 @@
-
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Aprendiz Quiz · Gamificação NEXUS</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 /* --- Identidade Visual: Azul Profundo & Amarelo Ouro --- */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -56,6 +56,13 @@ body{
 .p3 .block{height:110px; background:linear-gradient(#CD7F32, #8B4513)}
 
 @keyframes fadeUp{from{opacity:0; transform:translateY(20px)}to{opacity:1; transform:translateY(0)}}
+
+/* Estilo do Container do QR */
+#qrcode-container {
+    background:#fff; padding:15px; border-radius:20px; display:inline-block; margin:20px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+#qrcode img { margin: 0 auto; }
 </style>
 </head>
 <body>
@@ -82,8 +89,8 @@ body{
 
 <div id="screen-lobby" class="screen">
     <h2 class="orb" style="color:#FFD700">SALA DE IMERSÃO</h2>
-    <div style="background:#fff; padding:15px; border-radius:20px; display:inline-block; margin:20px 0">
-        <canvas id="qr"></canvas>
+    <div id="qrcode-container">
+        <div id="qrcode"></div>
     </div>
     <p class="orb" style="font-size:30px; letter-spacing:5px">PIN: <span id="pin">--- ---</span></p>
     <div id="playerCount" style="margin:20px 0; font-weight:800; color:#3b82f6">0 aprendizes conectados...</div>
@@ -156,7 +163,6 @@ function simulateAI() {
     btn.disabled = true;
 
     setTimeout(() => {
-        // Mock de questões geradas pela IA
         for(let i=1; i<=10; i++) {
             quiz.push({
                 q: `Pergunta de Imergir #${i}: Baseado no slide anexado, qual o ponto crítico?`,
@@ -171,15 +177,20 @@ function simulateAI() {
 function showLobby() {
     document.getElementById('screen-instructor').classList.remove('active');
     document.getElementById('screen-lobby').classList.add('active');
-    document.getElementById('pin').textContent = Math.floor(100000 + Math.random() * 900000);
-    drawQR();
-}
-
-function drawQR() {
-    const canvas = document.getElementById('qr');
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = "#0d1b3e";
-    for(let i=0; i<25; i++) for(let j=0; j<25; j++) if(Math.random()>0.6) ctx.fillRect(i*6, j*6, 5, 5);
+    const pin = Math.floor(100000 + Math.random() * 900000);
+    document.getElementById('pin').textContent = pin;
+    
+    // GERAR QR CODE REAL
+    const qrContainer = document.getElementById("qrcode");
+    qrContainer.innerHTML = ""; // Limpa antes de gerar
+    new QRCode(qrContainer, {
+        text: window.location.href + "?room=" + pin,
+        width: 200,
+        height: 200,
+        colorDark: "#050a1d",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
 }
 
 function startQuiz() {
@@ -218,12 +229,12 @@ function startTimer() {
 
 function answer(idx) {
     clearInterval(timer);
-    // Simula cálculo de pontos (Velocidade + Acerto)
-    const timeUsed = 25 - (parseFloat(document.getElementById('tBar').style.width)/4);
+    const barWidth = parseFloat(document.getElementById('tBar').style.width);
+    const timeUsed = 25 - (barWidth/4);
+    
     players[0].lastCorrect = (idx === quiz[currentIdx].ans);
     players[0].lastTime = timeUsed;
     
-    // Simula outros jogadores
     players[1].lastCorrect = Math.random() > 0.4;
     players[1].lastTime = Math.random() * 25;
     players[2].lastCorrect = Math.random() > 0.5;
@@ -233,10 +244,9 @@ function answer(idx) {
 }
 
 function showRanking() {
-    // Cálculo de Score (Conceito Flora Alves: Feedback de Performance)
     players.forEach(p => {
         if(p.lastCorrect) p.score += Math.round((25 - p.lastTime) * 100);
-        else p.score -= Math.round(p.lastTime * 10); // Penaliza erro lento
+        else p.score -= Math.round(p.lastTime * 10);
     });
 
     players.sort((a,b) => b.score - a.score);
