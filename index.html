@@ -3,277 +3,288 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Aprendiz Quiz · Gamificação NEXUS</title>
+<title>Aprendiz Quiz · NEXUS</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 <style>
-/* --- Identidade Visual Premium --- */
+/* --- Identidade Visual Premium: Azul & Amarelo Ouro --- */
 *{box-sizing:border-box;margin:0;padding:0}
 body{
     font-family:'Nunito',sans-serif;
     background: radial-gradient(circle at 50% 50%, #0d1b3e, #050a1d);
     color:#fff; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
 }
-
-.screen{display:none; width:100%; max-width:850px; text-align:center; animation:fadeUp 0.5s ease-out}
+.screen{display:none; width:100%; max-width:800px; text-align:center; animation:fadeUp 0.5s ease-out}
 .screen.active{display:block}
 .orb{font-family:'Orbitron',monospace;font-weight:900}
 
-/* Botões */
+/* Botões e Inputs */
 .btn{cursor:pointer; border:none; border-radius:15px; font-weight:900; transition:all 0.2s; display:inline-flex; align-items:center; justify-content:center; gap:10px}
-.btn-gold{background:linear-gradient(135deg,#d4af37, #f1c40f); color:#1a1a2e; padding:18px 40px; font-size:18px; box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3)}
+.btn-gold{background:linear-gradient(135deg,#d4af37, #f1c40f); color:#1a1a2e; padding:18px 40px; font-size:18px}
 .btn-blue{background:linear-gradient(135deg,#1e40af, #3b82f6); color:#fff; padding:15px 30px}
-.btn:disabled{opacity:0.4; cursor:not-allowed}
+input[type="text"]{padding:15px; border-radius:12px; border:none; width:100%; margin:15px 0; font-size:18px; text-align:center}
 
-/* --- Área de Upload --- */
-.upload-card{
-    background: rgba(255,255,255,0.03); border: 2px dashed #3b82f6; border-radius: 25px;
-    padding: 60px 40px; margin-bottom: 25px; transition: 0.3s; cursor: pointer;
-}
-.upload-card.ready{border-color:#FFD700; background: rgba(255,215,0,0.05)}
+/* Cards e UI */
+.card{background: rgba(255,255,255,0.03); border: 2px dashed #3b82f6; border-radius: 25px; padding: 40px; margin-bottom: 25px}
+.card.ready{border-color:#FFD700; background: rgba(255,215,0,0.05)}
+#qrcode-container{background:#fff; padding:20px; border-radius:20px; display:inline-block; margin:20px 0}
 
-/* --- QR CODE CENTRALIZADO --- */
-#qrcode-container {
-    background:#fff; 
-    padding:25px; 
-    border-radius:25px; 
-    display:inline-flex; 
-    align-items:center; 
-    justify-content:center;
-    margin:25px 0;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-    min-width: 250px;
-    min-height: 250px;
-}
-#qrcode img { 
-    display: block;
-    margin: 0 auto;
-}
-
-/* --- Quiz & Timer --- */
+/* Quiz & Ranking */
 .q-grid{display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:20px}
-.opt{padding:25px; border-radius:18px; border:none; color:#fff; font-size:20px; font-weight:800; text-align:left; cursor:pointer}
-.timer-container{width:100%; height:12px; background:rgba(255,255,255,0.1); border-radius:6px; margin:20px 0}
-.timer-bar{height:100%; background:#FFD700; width:100%; transition: width 1s linear}
+.opt{padding:25px; border-radius:18px; border:none; color:#fff; font-size:18px; font-weight:800; text-align:left; cursor:pointer}
+.timer-bar{height:12px; background:#FFD700; width:100%; transition: width 1s linear; border-radius:6px}
 
-/* --- Ranking & Pódio --- */
-.rank-item{display:flex; align-items:center; gap:15px; padding:12px; background:rgba(255,255,255,0.05); border-radius:12px; margin-bottom:8px}
-.podium-area{display:flex; align-items:flex-end; justify-content:center; gap:15px; height:400px; margin-top:30px}
-.block{width:140px; border-radius:12px 12px 0 0; display:flex; align-items:center; justify-content:center; font-size:45px; color:rgba(0,0,0,0.2)}
-.p1 .block{height:220px; background:linear-gradient(#FFD700, #B8860B)}
-.p2 .block{height:160px; background:linear-gradient(#C0C0C0, #707070)}
-.p3 .block{height:110px; background:linear-gradient(#CD7F32, #8B4513)}
+/* Pódio Lego */
+.podium-area{display:flex; align-items:flex-end; justify-content:center; gap:15px; height:300px; margin-top:30px}
+.block{width:120px; border-radius:12px 12px 0 0; display:flex; align-items:center; justify-content:center; font-size:40px; color:rgba(0,0,0,0.2)}
+.p1 .block{height:180px; background:#FFD700}.p2 .block{height:130px; background:#C0C0C0}.p3 .block{height:90px; background:#CD7F32}
 
 @keyframes fadeUp{from{opacity:0; transform:translateY(20px)}to{opacity:1; transform:translateY(0)}}
 </style>
 </head>
 <body>
 
-<div id="screen-instructor" class="screen active">
-    <h1 class="orb" style="color:#FFD700; font-size:48px; text-transform:uppercase">Aprendiz Quiz</h1>
-    <p style="opacity:0.7; margin-bottom:30px; letter-spacing:1px">Fase <b>IMERGIR</b> · Metodologia Aprendiz Protagonista</p>
-    
-    <div class="upload-card" id="dropZone">
-        <div id="upload-ui">
-            <div style="font-size:60px; margin-bottom:15px">📂</div>
-            <p style="font-weight:900; font-size:22px">Anexe sua apresentação aqui</p>
-            <p style="font-size:14px; opacity:0.5">PDF ou PPTX da aula</p>
-        </div>
-        <div id="ready-ui" style="display:none">
-            <div style="font-size:60px">✅</div>
-            <p id="file-name" style="color:#FFD700; font-weight:800; font-size:18px"></p>
-        </div>
-        <input type="file" id="fileIn" style="display:none">
+<div id="view-instructor-setup" class="screen">
+    <h1 class="orb" style="color:#FFD700; font-size:42px">Aprendiz Quiz</h1>
+    <p style="opacity:0.7; margin-bottom:30px">Fase <b>IMERGIR</b> · Processamento de IA NEXUS</p>
+    <div class="card" id="dropZone">
+        <div id="up-msg">📂 Clique para anexar o PDF da aula</div>
+        <input type="file" id="pdfIn" accept="application/pdf" style="display:none">
     </div>
-    
-    <button class="btn btn-gold" id="btnAI" disabled onclick="simulateAI()">✨ GERAR PERGUNTAS COM IA</button>
+    <button class="btn btn-gold" id="btnProcess" disabled onclick="processPDF()">✨ GERAR PERGUNTAS DA AULA</button>
 </div>
 
-<div id="screen-lobby" class="screen">
-    <h2 class="orb" style="color:#FFD700; font-size:32px">SALA DE IMERSÃO</h2>
-    <div id="qrcode-container">
-        <div id="qrcode"></div>
-    </div>
-    <p class="orb" style="font-size:34px; letter-spacing:6px; margin-bottom:10px">PIN: <span id="pin">331301</span></p>
-    <div id="playerCount" style="margin-bottom:25px; font-weight:800; color:#3b82f6; font-size:18px">0 aprendizes conectados...</div>
-    <button class="btn btn-gold" onclick="startQuiz()">🎯 INICIAR JOGO</button>
+<div id="view-instructor-lobby" class="screen">
+    <h2 class="orb" style="color:#FFD700">SALA DE IMERSÃO</h2>
+    <div id="qrcode-container"><div id="qrcode"></div></div>
+    <p class="orb" style="font-size:32px">PIN: <span id="pinDisplay">000000</span></p>
+    <div style="font-size:24px; color:#3b82f6; margin:20px 0">👥 Aprendizes: <span id="pCount">0</span></div>
+    <button class="btn btn-gold" onclick="startGlobalGame()">🎯 INICIAR QUIZZ AGORA</button>
 </div>
 
-<div id="screen-quiz" class="screen">
-    <div id="qCounter" class="orb" style="color:#3b82f6">Questão 1/10</div>
-    <div class="timer-container"><div id="tBar" class="timer-bar"></div></div>
-    <h2 id="qText" style="font-size:28px; margin:20px 0; text-align:left"></h2>
+<div id="view-jovem-login" class="screen">
+    <h1 class="orb" style="color:#FFD700">ENTRAR NO GAME</h1>
+    <p>Insira seu nome para o pódio de Lego</p>
+    <input type="text" id="playerName" placeholder="Seu nome completo">
+    <div style="margin:20px 0">
+        <p>Escolha seu Avatar Lego:</p>
+        <div id="avatarPicker" style="font-size:40px; display:flex; justify-content:center; gap:15px; cursor:pointer">
+            <span onclick="selAv(this)">🦁</span><span onclick="selAv(this)">🤖</span><span onclick="selAv(this)">🦊</span><span onclick="selAv(this)">🦖</span>
+        </div>
+    </div>
+    <button class="btn btn-gold" onclick="joinGame()">ENTRAR NA SALA</button>
+</div>
+
+<div id="view-jovem-wait" class="screen">
+    <div style="font-size:80px; margin-bottom:20px">⏳</div>
+    <h2 class="orb">Tudo pronto, <span id="waitName"></span>!</h2>
+    <p>Olhe para a tela principal. O instrutor iniciará em breve.</p>
+</div>
+
+<div id="view-quiz" class="screen">
+    <div id="qNum" class="orb" style="color:#3b82f6">Questão 1/10</div>
+    <div style="width:100%; background:rgba(255,255,255,0.1); height:12px; border-radius:6px; margin:20px 0">
+        <div id="tBar" class="timer-bar"></div>
+    </div>
+    <h2 id="qText" style="font-size:26px; text-align:left; margin-bottom:25px"></h2>
     <div class="q-grid" id="qGrid"></div>
 </div>
 
-<div id="screen-rank" class="screen">
-    <h2 class="orb" style="color:#FFD700">RANKING DA RODADA</h2>
-    <div id="rankingList" style="margin-top:20px"></div>
-    <button class="btn btn-blue" style="margin-top:30px" onclick="nextQuestion()">PRÓXIMA PERGUNTA ➡</button>
-</div>
-
-<div id="screen-podium" class="screen">
-    <h1 class="orb" style="color:#FFD700; font-size:40px">PÓDIO FINAL</h1>
+<div id="view-podium" class="screen">
+    <h1 class="orb" style="color:#FFD700">PÓDIO FINAL</h1>
     <div class="podium-area">
-        <div class="p2 lego-guy">
-            <div style="font-size:40px; margin-bottom:10px">👤</div>
-            <div id="name2" style="font-size:14px; margin-bottom:5px">--</div>
-            <div class="block">🥈</div>
-        </div>
-        <div class="p1 lego-guy">
-            <div style="font-size:60px; margin-bottom:10px">👑</div>
-            <div id="name1" style="font-weight:900; color:#FFD700; margin-bottom:5px">--</div>
-            <div class="block">🥇</div>
-        </div>
-        <div class="p3 lego-guy">
-            <div style="font-size:40px; margin-bottom:10px">👤</div>
-            <div id="name3" style="font-size:14px; margin-bottom:5px">--</div>
-            <div class="block">🥉</div>
-        </div>
+        <div class="p2"><div style="font-size:40px">🥈</div><div id="n2">--</div><div class="block">2º</div></div>
+        <div class="p1"><div style="font-size:60px">🥇</div><div id="n1">--</div><div class="block">1º</div></div>
+        <div class="p3"><div style="font-size:40px">🥉</div><div id="n3">--</div><div class="block">3º</div></div>
     </div>
-    <button class="btn btn-gold" style="margin-top:40px" onclick="location.reload()">REINICIAR EXPERIÊNCIA</button>
+    <button class="btn btn-gold" style="margin-top:40px" onclick="location.href=location.pathname">NOVA AULA</button>
 </div>
 
 <script>
-let players = [
-    {name: "Diego", score: 0, avatar: "🦁", lastTime: 0, lastCorrect: false},
-    {name: "Aprendiz Beta", score: 0, avatar: "🤖", lastTime: 0, lastCorrect: false},
-    {name: "Aprendiz Gama", score: 0, avatar: "🦊", lastTime: 0, lastCorrect: false}
-];
-let quiz = [];
-let currentIdx = 0;
-let timer;
-
-// Upload logic
-const dropZone = document.getElementById('dropZone');
-const fileIn = document.getElementById('fileIn');
-dropZone.onclick = () => fileIn.click();
-fileIn.onchange = (e) => {
-    if(e.target.files[0]) {
-        dropZone.classList.add('ready');
-        document.getElementById('upload-ui').style.display = 'none';
-        document.getElementById('ready-ui').style.display = 'block';
-        document.getElementById('file-name').textContent = e.target.files[0].name;
-        document.getElementById('btnAI').disabled = false;
-    }
+// --- CONFIGURAÇÃO DE ESTADO ---
+let state = {
+    view: 'setup',
+    players: [],
+    questions: [],
+    currentQ: 0,
+    pin: Math.floor(100000 + Math.random() * 900000),
+    myId: 'id_' + Math.random().toString(36).substr(2, 9),
+    myRole: 'instrutor', // Default
+    selectedAvatar: '🦁'
 };
 
-function simulateAI() {
-    const btn = document.getElementById('btnAI');
-    btn.innerHTML = "🧠 AGENTE IA ANALISANDO SLIDES...";
-    btn.disabled = true;
-    setTimeout(() => {
-        for(let i=1; i<=10; i++) {
-            quiz.push({
-                q: `Questão ${i}: De acordo com a apresentação, qual a base da fase IMERGIR?`,
-                opts: ["Inércia", "Empatia e Pesquisa ✅", "Execução sem plano", "Finalização imediata"],
-                ans: 1
-            });
+// Verificar se é Jovem entrando pelo QR Code
+const urlParams = new URLSearchParams(window.location.search);
+if(urlParams.has('room')) {
+    state.myRole = 'jovem';
+    state.pin = urlParams.get('room');
+    showView('view-jovem-login');
+} else {
+    showView('view-instructor-setup');
+}
+
+// --- FUNÇÕES DE NAVEGAÇÃO ---
+function showView(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function selAv(el) {
+    document.querySelectorAll('#avatarPicker span').forEach(s => s.style.border="none");
+    el.style.border = "2px solid #FFD700";
+    state.selectedAvatar = el.textContent;
+}
+
+// --- LÓGICA DE PDF & IA ---
+const pdfIn = document.getElementById('pdfIn');
+document.getElementById('dropZone').onclick = () => pdfIn.click();
+pdfIn.onchange = () => { document.getElementById('btnProcess').disabled = false; document.getElementById('up-msg').textContent = "✅ PDF Carregado!"; };
+
+async function processPDF() {
+    const btn = document.getElementById('btnProcess');
+    btn.innerHTML = "🤖 AGENTE IA LENDO PDF...";
+    
+    const file = pdfIn.files[0];
+    const reader = new FileReader();
+    reader.onload = async function() {
+        const typedarray = new Uint8Array(this.result);
+        const pdf = await pdfjsLib.getDocument(typedarray).promise;
+        let fullText = "";
+        
+        for(let i=1; i <= Math.min(pdf.numPages, 10); i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            fullText += textContent.items.map(s => s.str).join(' ');
         }
-        showLobby();
-    }, 1800);
+        
+        generateQuestionsFromText(fullText);
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function generateQuestionsFromText(text) {
+    // Simulação da IA processando o texto extraído (Na prática, você enviaria 'text' para uma API)
+    // Aqui criamos questões baseadas em palavras-chave encontradas no texto
+    const keywords = text.split(' ').filter(w => w.length > 5).slice(0, 20);
+    
+    state.questions = Array.from({length: 10}, (_, i) => ({
+        q: `Sobre o conceito de "${keywords[i] || 'Aula'}", qual a aplicação correta na fase IMERGIR?`,
+        opts: ["Aplicação passiva", "Execução Protagonista ✅", "Focar apenas na teoria", "Ignorar o contexto"],
+        ans: 1
+    }));
+    
+    localStorage.setItem('quiz_'+state.pin, JSON.stringify(state.questions));
+    showLobby();
 }
 
 function showLobby() {
-    document.getElementById('screen-instructor').classList.remove('active');
-    document.getElementById('screen-lobby').classList.add('active');
-    
-    // Gerar QR Code Real e Centralizado
-    const qrContainer = document.getElementById("qrcode");
-    qrContainer.innerHTML = ""; 
-    
-    // Pequeno delay para garantir que o container esteja visível antes do desenho
-    setTimeout(() => {
-        new QRCode(qrContainer, {
-            text: window.location.href,
-            width: 200,
-            height: 200,
-            colorDark: "#050a1d",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
-        });
-    }, 100);
-}
-
-function startQuiz() {
-    document.getElementById('screen-lobby').classList.remove('active');
-    document.getElementById('screen-quiz').classList.add('active');
-    loadQuestion();
-}
-
-function loadQuestion() {
-    const q = quiz[currentIdx];
-    document.getElementById('qCounter').textContent = `Questão ${currentIdx+1}/10`;
-    document.getElementById('qText').textContent = q.q;
-    const grid = document.getElementById('qGrid');
-    grid.innerHTML = '';
-    const colors = ['#e21b3c', '#1368ce', '#d89e00', '#26890c'];
-    q.opts.forEach((o, i) => {
-        grid.innerHTML += `<button class="opt" style="background:${colors[i]}" onclick="answer(${i})">${o}</button>`;
+    showView('view-instructor-lobby');
+    document.getElementById('pinDisplay').textContent = state.pin;
+    new QRCode(document.getElementById("qrcode"), {
+        text: window.location.href + "?room=" + state.pin,
+        width: 200, height: 200
     });
-    startTimer();
+    
+    // Inicia escuta de novos jogadores
+    setInterval(updatePlayerCount, 1000);
 }
 
-function startTimer() {
-    let timeLeft = 25;
-    const bar = document.getElementById('tBar');
-    bar.style.width = "100%";
-    clearInterval(timer);
-    timer = setInterval(() => {
-        timeLeft--;
-        bar.style.width = (timeLeft/25)*100 + "%";
-        if(timeLeft <= 0) showRanking();
+function updatePlayerCount() {
+    const pKey = 'players_' + state.pin;
+    const ps = JSON.parse(localStorage.getItem(pKey) || "[]");
+    document.getElementById('pCount').textContent = ps.length;
+}
+
+// --- LÓGICA DO JOVEM ---
+function joinGame() {
+    const name = document.getElementById('playerName').value;
+    if(!name) return alert("Insira seu nome!");
+    
+    const pKey = 'players_' + state.pin;
+    const ps = JSON.parse(localStorage.getItem(pKey) || "[]");
+    ps.push({id: state.myId, name: name, avatar: state.selectedAvatar, score: 0});
+    localStorage.setItem(pKey, JSON.stringify(ps));
+    
+    document.getElementById('waitName').textContent = name;
+    showView('view-jovem-wait');
+    
+    // Escuta início do game
+    setInterval(() => {
+        if(localStorage.getItem('start_'+state.pin)) loadQuiz();
     }, 1000);
 }
 
-function answer(idx) {
-    clearInterval(timer);
-    const timeUsed = 25 - (parseFloat(document.getElementById('tBar').style.width)/4);
-    players[0].lastCorrect = (idx === quiz[currentIdx].ans);
-    players[0].lastTime = timeUsed;
-    players[1].lastCorrect = Math.random() > 0.4;
-    players[1].lastTime = Math.random() * 25;
-    players[2].lastCorrect = Math.random() > 0.5;
-    players[2].lastTime = Math.random() * 25;
-    showRanking();
+// --- DINÂMICA DO GAME ---
+function startGlobalGame() {
+    localStorage.setItem('start_'+state.pin, "true");
+    loadQuiz();
 }
 
-function showRanking() {
-    players.forEach(p => {
-        if(p.lastCorrect) p.score += Math.round((25 - p.lastTime) * 100);
-        else p.score -= 50;
+function loadQuiz() {
+    state.questions = JSON.parse(localStorage.getItem('quiz_'+state.pin));
+    showView('view-quiz');
+    runQuestion();
+}
+
+function runQuestion() {
+    const q = state.questions[state.currentQ];
+    document.getElementById('qNum').textContent = `Questão ${state.currentQ + 1}/10`;
+    document.getElementById('qText').textContent = q.q;
+    const grid = document.getElementById('qGrid');
+    grid.innerHTML = '';
+    
+    const colors = ['#e21b3c', '#1368ce', '#d89e00', '#26890c'];
+    q.opts.forEach((o, i) => {
+        grid.innerHTML += `<button class="opt" style="background:${colors[i]}" onclick="checkAns(${i})">${o}</button>`;
     });
-    players.sort((a,b) => b.score - a.score);
-    document.getElementById('screen-quiz').classList.remove('active');
-    document.getElementById('screen-rank').classList.add('active');
-    const list = document.getElementById('rankingList');
-    list.innerHTML = players.map((p, i) => `
-        <div class="rank-item" style="${i===0?'border:1px solid #FFD700; background:rgba(255,215,0,0.1)':''}">
-            <span class="orb">${i+1}º</span>
-            <span>${p.avatar}</span>
-            <span style="flex:1; font-weight:800">${p.name}</span>
-            <span class="orb" style="color:#FFD700">${p.score} pts</span>
-        </div>
-    `).join('');
+    
+    startTimer();
 }
 
-function nextQuestion() {
-    currentIdx++;
-    if(currentIdx < 10) {
-        document.getElementById('screen-rank').classList.remove('active');
-        document.getElementById('screen-quiz').classList.add('active');
-        loadQuestion();
-    } else {
-        showFinalPodium();
+let timeLeft = 25;
+let qTimer;
+function startTimer() {
+    timeLeft = 25;
+    const bar = document.getElementById('tBar');
+    bar.style.width = "100%";
+    clearInterval(qTimer);
+    qTimer = setInterval(() => {
+        timeLeft--;
+        bar.style.width = (timeLeft/25)*100 + "%";
+        if(timeLeft <= 0) nextQ();
+    }, 1000);
+}
+
+function checkAns(idx) {
+    if(idx === state.questions[state.currentQ].ans) {
+        // Lógica de pontos Flora Alves (Velocidade + Acerto)
+        updateMyScore(timeLeft * 10);
     }
+    nextQ();
+}
+
+function nextQ() {
+    clearInterval(qTimer);
+    state.currentQ++;
+    if(state.currentQ < 10) runQuestion();
+    else showFinalPodium();
+}
+
+function updateMyScore(pts) {
+    const pKey = 'players_' + state.pin;
+    let ps = JSON.parse(localStorage.getItem(pKey));
+    let me = ps.find(p => p.id === state.myId);
+    if(me) me.score += pts;
+    localStorage.setItem(pKey, JSON.stringify(ps));
 }
 
 function showFinalPodium() {
-    document.getElementById('screen-rank').classList.remove('active');
-    document.getElementById('screen-podium').classList.add('active');
-    document.getElementById('name1').textContent = players[0].name;
-    document.getElementById('name2').textContent = players[1].name;
-    document.getElementById('name3').textContent = players[2].name;
+    showView('view-podium');
+    const ps = JSON.parse(localStorage.getItem('players_' + state.pin)).sort((a,b) => b.score - a.score);
+    if(ps[0]) document.getElementById('n1').textContent = ps[0].avatar + " " + ps[0].name;
+    if(ps[1]) document.getElementById('n2').textContent = ps[1].avatar + " " + ps[1].name;
+    if(ps[2]) document.getElementById('n3').textContent = ps[2].avatar + " " + ps[2].name;
 }
 </script>
 </body>
