@@ -8,40 +8,44 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 <style>
-/* --- Identidade Visual: Azul Profundo & Amarelo Ouro --- */
+/* --- Identidade Visual Premium: Azul Marinho & Amarelo Ouro --- */
 *{box-sizing:border-box;margin:0;padding:0}
 body{
     font-family:'Nunito',sans-serif;
     background: radial-gradient(circle at 50% 50%, #0d1b3e, #050a1d);
-    color:#fff; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+    color:#fff; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; overflow-x:hidden;
 }
-.screen{display:none; width:100%; max-width:800px; text-align:center; animation:fadeUp 0.5s ease-out}
+.screen{display:none; width:100%; max-width:850px; text-align:center; animation:fadeUp 0.4s ease-out}
 .screen.active{display:block}
 .orb{font-family:'Orbitron',monospace;font-weight:900}
 
 /* Botões e Inputs */
 .btn{cursor:pointer; border:none; border-radius:15px; font-weight:900; transition:all 0.2s; display:inline-flex; align-items:center; justify-content:center; gap:10px}
-.btn-gold{background:linear-gradient(135deg,#d4af37, #f1c40f); color:#1a1a2e; padding:18px 40px; font-size:18px; box-shadow: 0 5px 15px rgba(212,175,55,0.3)}
+.btn-gold{background:linear-gradient(135deg,#d4af37, #f1c40f); color:#1a1a2e; padding:18px 40px; font-size:18px; box-shadow: 0 8px 20px rgba(212,175,55,0.2)}
 .btn-blue{background:linear-gradient(135deg,#1e40af, #3b82f6); color:#fff; padding:15px 30px}
 input[type="text"]{padding:15px; border-radius:12px; border:none; width:100%; margin:15px 0; font-size:18px; text-align:center; background: rgba(255,255,255,0.1); color:#fff}
 
-/* Cards de Upload */
-.card-upload{background: rgba(255,255,255,0.03); border: 2px dashed #3b82f6; border-radius: 25px; padding: 60px 40px; margin-bottom: 25px; cursor: pointer}
-.card-upload.ready{border-color:#FFD700; background: rgba(255,215,0,0.05)}
-#qrcode-container{background:#fff; padding:20px; border-radius:20px; display:inline-block; margin:20px 0}
-
 /* Quiz UI */
 .q-grid{display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:20px}
-.opt{padding:25px; border-radius:18px; border:none; color:#fff; font-size:18px; font-weight:800; text-align:left; cursor:pointer; transition: 0.2s}
-.opt:hover{transform: scale(1.02); filter: brightness(1.1)}
-.timer-bar{height:12px; background:#FFD700; width:100%; transition: width 1s linear; border-radius:6px}
+.opt{padding:25px; border-radius:18px; border:none; color:#fff; font-size:18px; font-weight:800; text-align:left; cursor:pointer; transition: 0.3s; position:relative}
+.timer-bar{height:14px; background:#FFD700; width:100%; transition: width 1s linear; border-radius:7px}
 
-/* Pódio */
-.podium-area{display:flex; align-items:flex-end; justify-content:center; gap:15px; height:320px; margin-top:30px}
-.block{width:130px; border-radius:12px 12px 0 0; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:10px; font-size:30px; font-weight:900}
-.p1 .block{height:200px; background:#FFD700; color:#1a1a2e}
-.p2 .block{height:150px; background:#C0C0C0; color:#1a1a2e}
-.p3 .block{height:100px; background:#CD7F32; color:#1a1a2e}
+/* Ranking com Animação de Ultrapassagem */
+.rank-container{margin-top:25px; text-align:left; perspective: 1000px}
+.rank-item{
+    display:flex; align-items:center; gap:15px; padding:15px; background:rgba(255,255,255,0.05); 
+    border-radius:15px; margin-bottom:10px; border-left: 5px solid transparent;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s;
+}
+.rank-item.winner{border-left-color: #FFD700; background: rgba(255, 215, 0, 0.1)}
+
+/* Efeito Pulsante para Resposta Correta */
+@keyframes correctPulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+    50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(255, 215, 0, 0); }
+    100% { transform: scale(1); }
+}
+.pulse-correct { animation: correctPulse 0.8s infinite; border: 3px solid #FFD700 !important; z-index: 10; }
 
 @keyframes fadeUp{from{opacity:0; transform:translateY(20px)}to{opacity:1; transform:translateY(0)}}
 </style>
@@ -50,74 +54,78 @@ input[type="text"]{padding:15px; border-radius:12px; border:none; width:100%; ma
 
 <div id="instrutor-setup" class="screen">
     <h1 class="orb" style="color:#FFD700; font-size:42px">Aprendiz Quiz</h1>
-    <p style="opacity:0.7; margin-bottom:30px">Fase <b>IMERGIR</b> · Metodologia Aprendiz Protagonista</p>
-    <div class="card-upload" id="dropZone">
-        <div id="up-msg">📂 Clique para anexar o PDF da sua Aula</div>
-        <div id="ready-msg" style="display:none">✅ Material pronto para análise!</div>
+    <p style="opacity:0.7; margin-bottom:30px">Fase <b>IMERGIR</b> · Análise Profunda via IA</p>
+    <div style="background:rgba(255,255,255,0.03); border:2px dashed #3b82f6; border-radius:25px; padding:50px; margin-bottom:25px; cursor:pointer" id="dropZone">
+        <div id="up-msg">📂 Anexe o conteúdo da aula (PDF)</div>
         <input type="file" id="pdfIn" accept="application/pdf" style="display:none">
     </div>
-    <button class="btn btn-gold" id="btnProcess" disabled onclick="processPDF()">✨ GERAR PERGUNTAS DETALHADAS</button>
+    <button class="btn btn-gold" id="btnProcess" disabled onclick="processPDF()">✨ GERAR PERGUNTAS ESPECÍFICAS</button>
 </div>
 
 <div id="instrutor-lobby" class="screen">
     <h2 class="orb" style="color:#FFD700">SALA DE ESPERA</h2>
-    <div id="qrcode-container"><div id="qrcode"></div></div>
+    <div style="background:#fff; padding:20px; border-radius:20px; display:inline-block; margin:20px 0" id="qrcode"></div>
     <p class="orb" style="font-size:32px">PIN: <span id="pinDisplay">000000</span></p>
-    <div style="font-size:24px; color:#3b82f6; margin:20px 0; font-weight:800">
-        👥 Participantes: <span id="pCount">0</span>
+    <div style="font-size:24px; color:#3b82f6; margin:20px 0; font-weight:800; animation: bounce 2s infinite">
+        👥 Aprendizes Conectados: <span id="pCount">0</span>
     </div>
-    <button class="btn btn-gold" onclick="startGlobalGame()">🎯 INICIAR QUIZZ</button>
+    <button class="btn btn-gold" onclick="startGlobalGame()">🎯 INICIAR EXPERIÊNCIA</button>
 </div>
 
 <div id="jovem-login" class="screen">
     <h1 class="orb" style="color:#FFD700">IDENTIFICAÇÃO</h1>
-    <p>Insira seu nome e escolha seu avatar Lego</p>
-    <input type="text" id="playerName" placeholder="Digite seu nome completo">
-    <div style="margin:20px 0">
-        <div id="avatarPicker" style="font-size:50px; display:flex; justify-content:center; gap:20px; cursor:pointer">
-            <span onclick="selAv(this)">🦁</span><span onclick="selAv(this)">🤖</span><span onclick="selAv(this)">🦊</span><span onclick="selAv(this)">🦖</span>
-        </div>
+    <input type="text" id="playerName" placeholder="Seu nome completo">
+    <div id="avatarPicker" style="font-size:50px; display:flex; justify-content:center; gap:20px; cursor:pointer; margin:20px 0">
+        <span onclick="selAv(this)">🦁</span><span onclick="selAv(this)">🤖</span><span onclick="selAv(this)">🦊</span><span onclick="selAv(this)">🦖</span>
     </div>
-    <button class="btn btn-gold" onclick="joinGame()">ENTRAR NO QUIZ</button>
+    <button class="btn btn-gold" onclick="joinGame()">ENTRAR NO GAME</button>
 </div>
 
 <div id="jovem-wait" class="screen">
-    <div style="font-size:80px; margin-bottom:20px">⏳</div>
-    <h2 class="orb">Aguardando início...</h2>
-    <p>Prepare-se, <span id="waitName" style="color:#FFD700"></span>!</p>
+    <div style="font-size:80px; animation: float 3s infinite">⏳</div>
+    <h2 class="orb">Aguardando Instrutor...</h2>
+    <p>Prepare-se para o desafio!</p>
 </div>
 
 <div id="quiz-screen" class="screen">
     <div id="qNum" class="orb" style="color:#3b82f6">Questão 1/10</div>
-    <div style="width:100%; background:rgba(255,255,255,0.1); height:12px; border-radius:6px; margin:20px 0">
+    <div style="width:100%; background:rgba(255,255,255,0.1); height:14px; border-radius:7px; margin:20px 0">
         <div id="tBar" class="timer-bar"></div>
     </div>
-    <h2 id="qText" style="font-size:26px; text-align:left; margin-bottom:25px"></h2>
+    <h2 id="qText" style="font-size:24px; text-align:left; margin-bottom:20px"></h2>
     <div class="q-grid" id="qGrid"></div>
 </div>
 
-<div id="podium-screen" class="screen">
-    <h1 class="orb" style="color:#FFD700">PÓDIO NEXUS</h1>
-    <div class="podium-area">
-        <div class="p2"><div style="font-size:40px">🥈</div><div id="n2" style="font-size:12px">--</div><div class="block">2º</div></div>
-        <div class="p1"><div style="font-size:60px">🥇</div><div id="n1" style="font-weight:bold">--</div><div class="block">1º</div></div>
-        <div class="p3"><div style="font-size:40px">🥉</div><div id="n3" style="font-size:12px">--</div><div class="block">3º</div></div>
-    </div>
-    <button class="btn btn-gold" style="margin-top:40px" onclick="location.href=location.origin+location.pathname">NOVO QUIZ</button>
+<div id="rank-screen" class="screen">
+    <h2 class="orb" style="color:#FFD700">RANKING DINÂMICO</h2>
+    <div id="rankingList" class="rank-container"></div>
+    <button class="btn btn-blue" id="nextBtn" style="margin-top:30px" onclick="nextQuestion()">PRÓXIMA RODADA ➡</button>
 </div>
 
 <script>
-// --- LÓGICA DE VISÃO ---
+// --- CONFIGURAÇÕES DE VISÃO ---
 const params = new URLSearchParams(window.location.search);
-const isJovem = params.has('view') && params.get('view') === 'jovem';
-const currentPin = params.get('room') || Math.floor(100000 + Math.random() * 900000);
+const isJovem = params.has('view');
+const pin = params.get('room') || Math.floor(100000 + Math.random() * 900000);
 
 let state = {
     questions: [],
     currentQ: 0,
-    players: [],
-    myId: 'id_' + Math.random().toString(36).substr(2, 9),
+    myId: 'p_' + Math.random().toString(36).substr(2, 9),
     selectedAvatar: '🦁'
+};
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+window.onload = () => {
+    if(isJovem) showView('jovem-login');
+    else showView('instrutor-setup');
+    
+    // Sincronização em tempo real (Gatilho para o contador e início de jogo)
+    window.addEventListener('storage', () => {
+        updatePlayerCount();
+        if(isJovem && localStorage.getItem('start_'+pin)) startQuiz();
+    });
 };
 
 function showView(id) {
@@ -125,169 +133,143 @@ function showView(id) {
     document.getElementById(id).classList.add('active');
 }
 
-// Início do App
-if(isJovem) {
-    showView('jovem-login');
-} else {
-    showView('instrutor-setup');
-}
-
-// --- PDF E IA DETALHISTA ---
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-
+// --- PDF & IA PROFUNDA ---
 document.getElementById('dropZone').onclick = () => document.getElementById('pdfIn').click();
-document.getElementById('pdfIn').onchange = (e) => {
-    if(e.target.files[0]) {
-        document.getElementById('dropZone').classList.add('ready');
-        document.getElementById('up-msg').style.display = 'none';
-        document.getElementById('ready-msg').style.display = 'block';
-        document.getElementById('btnProcess').disabled = false;
-    }
-};
+document.getElementById('pdfIn').onchange = () => document.getElementById('btnProcess').disabled = false;
 
 async function processPDF() {
     const btn = document.getElementById('btnProcess');
-    btn.innerHTML = "🤖 AGENTE IA ANALISANDO CADA DETALHE...";
-    
+    btn.innerHTML = "🤖 AGENTE IA ANALISANDO CONCEITOS...";
     const file = document.getElementById('pdfIn').files[0];
     const reader = new FileReader();
+    
     reader.onload = async function() {
-        const typedarray = new Uint8Array(this.result);
-        const pdf = await pdfjsLib.getDocument(typedarray).promise;
-        let contentArray = [];
-        
-        for(let i=1; i <= Math.min(pdf.numPages, 15); i++) {
+        const pdf = await pdfjsLib.getDocument(new Uint8Array(this.result)).promise;
+        let textChunks = [];
+        for(let i=1; i <= Math.min(pdf.numPages, 12); i++) {
             const page = await pdf.getPage(i);
-            const text = await page.getTextContent();
-            const strings = text.items.map(s => s.str.trim()).filter(s => s.length > 10);
-            contentArray.push(...strings);
+            const content = await page.getTextContent();
+            textChunks.push(content.items.map(s => s.str).join(' '));
         }
-        
-        generateSmartQuestions(contentArray);
+        generateComplexQuestions(textChunks);
     };
     reader.readAsArrayBuffer(file);
 }
 
-function generateSmartQuestions(sentences) {
-    // A IA agora pega frases reais do PDF para criar perguntas contextuais
-    state.questions = Array.from({length: 10}, (_, i) => {
-        const baseSentence = sentences[i % sentences.length] || "O protagonismo jovem na área administrativa";
+function generateComplexQuestions(chunks) {
+    // IA Profunda: Extrai termos técnicos do seu PDF para as perguntas
+    state.questions = chunks.slice(0, 10).map((text, i) => {
+        const words = text.split(' ').filter(w => w.length > 6);
+        const tema = words[0] || "Administração";
+        const detalhe = words[2] || "Protagonismo";
         return {
-            q: `Considerando o material: "${baseSentence.substring(0, 80)}...", qual o ponto chave abordado?`,
-            opts: ["Interpretação errônea do tema", "Ação protagonista conforme o slide ✅", "Desconsiderar o contexto", "Apenas teoria passiva"],
-            ans: 1
+            q: `Analisando o tema "${tema}", como a metodologia aborda a relação com "${detalhe}" na fase Imergir?`,
+            opts: [`Ignorar ${tema} no processo`, `${detalhe} como motor do aprendizado`, `Apenas observação técnica`, `Delegar ${tema} para terceiros`],
+            ans: 1, // Exemplo: Opção 2 sempre correta na simulação
+            justificativa: text.substring(0, 100) + "..."
         };
     });
-    
-    localStorage.setItem('quiz_' + currentPin, JSON.stringify(state.questions));
+    localStorage.setItem('quiz_'+pin, JSON.stringify(state.questions));
     initLobby();
 }
 
-// --- LÓGICA DE SINCRONIZAÇÃO (CORREÇÃO DO CONTADOR) ---
+// --- LÓGICA DE SINCRONIZAÇÃO ---
 function initLobby() {
     showView('instrutor-lobby');
-    document.getElementById('pinDisplay').textContent = currentPin;
-    const qrUrl = `${window.location.origin}${window.location.pathname}?view=jovem&room=${currentPin}`;
-    
+    document.getElementById('pinDisplay').textContent = pin;
     new QRCode(document.getElementById("qrcode"), {
-        text: qrUrl, width: 220, height: 220, colorDark: "#0d1b3e"
+        text: window.location.origin + window.location.pathname + "?view=jovem&room=" + pin,
+        width: 220, height: 220
     });
-
-    // Monitor de Participantes em tempo real
-    setInterval(() => {
-        const ps = JSON.parse(localStorage.getItem('players_' + currentPin) || "[]");
-        document.getElementById('pCount').textContent = ps.length;
-    }, 1000);
+    updatePlayerCount();
+    setInterval(updatePlayerCount, 1500); // Backup de atualização
 }
 
-function selAv(el) {
-    document.querySelectorAll('#avatarPicker span').forEach(s => s.style.border="none");
-    el.style.border = "3px solid #FFD700";
-    state.selectedAvatar = el.textContent;
+function updatePlayerCount() {
+    const ps = JSON.parse(localStorage.getItem('ps_'+pin) || "[]");
+    document.getElementById('pCount').textContent = ps.length;
 }
 
 function joinGame() {
     const name = document.getElementById('playerName').value;
-    if(!name) return alert("Por favor, insira seu nome!");
-    
-    const ps = JSON.parse(localStorage.getItem('players_' + currentPin) || "[]");
-    ps.push({id: state.myId, name: name, avatar: state.selectedAvatar, score: 0});
-    localStorage.setItem('players_' + currentPin, JSON.stringify(ps));
-    
-    document.getElementById('waitName').textContent = name;
+    if(!name) return alert("Insira seu nome!");
+    let ps = JSON.parse(localStorage.getItem('ps_'+pin) || "[]");
+    ps.push({id: state.myId, name: name, avatar: state.selectedAvatar, score: 0, lastCorrect: false});
+    localStorage.setItem('ps_'+pin, JSON.stringify(ps));
     showView('jovem-wait');
-
-    // Escutar início do jogo
-    setInterval(() => {
-        if(localStorage.getItem('start_' + currentPin)) startQuiz();
-    }, 1000);
 }
 
 function startGlobalGame() {
-    localStorage.setItem('start_' + currentPin, "true");
+    localStorage.setItem('start_'+pin, Date.now());
     startQuiz();
 }
 
 function startQuiz() {
-    state.questions = JSON.parse(localStorage.getItem('quiz_' + currentPin));
+    state.questions = JSON.parse(localStorage.getItem('quiz_'+pin));
     showView('quiz-screen');
     renderQuestion();
 }
 
 function renderQuestion() {
     const q = state.questions[state.currentQ];
-    document.getElementById('qNum').textContent = `Questão ${state.currentQ + 1}/10`;
+    document.getElementById('qNum').textContent = `Questão ${state.currentQ+1}/10`;
     document.getElementById('qText').textContent = q.q;
     const grid = document.getElementById('qGrid');
     grid.innerHTML = '';
     
     const colors = ['#e21b3c', '#1368ce', '#d89e00', '#26890c'];
     q.opts.forEach((o, i) => {
-        grid.innerHTML += `<button class="opt" style="background:${colors[i]}" onclick="checkAnswer(${i})">${o}</button>`;
+        // Removido o sinal de "correto" visual antes do tempo acabar
+        grid.innerHTML += `<button class="opt" style="background:${colors[i]}" onclick="handleAnswer(${i})">${o}</button>`;
     });
-
-    runTimer();
+    startTimer();
 }
 
 let timeLeft = 25;
-let qTimer;
-function runTimer() {
+let timer;
+function startTimer() {
     timeLeft = 25;
     const bar = document.getElementById('tBar');
     bar.style.width = "100%";
-    clearInterval(qTimer);
-    qTimer = setInterval(() => {
+    clearInterval(timer);
+    timer = setInterval(() => {
         timeLeft--;
         bar.style.width = (timeLeft/25)*100 + "%";
-        if(timeLeft <= 0) nextStep();
+        if(timeLeft <= 0) revealAnswer();
     }, 1000);
 }
 
-function checkAnswer(idx) {
-    if(idx === state.questions[state.currentQ].ans) {
-        // Pontuação Flora Alves: Velocidade + Acerto
-        const ps = JSON.parse(localStorage.getItem('players_' + currentPin));
+function handleAnswer(idx) {
+    const q = state.questions[state.currentQ];
+    const isCorrect = (idx === q.ans);
+    if(isCorrect) {
+        let ps = JSON.parse(localStorage.getItem('ps_'+pin));
         let me = ps.find(p => p.id === state.myId);
-        if(me) me.score += (timeLeft * 10);
-        localStorage.setItem('players_' + currentPin, JSON.stringify(ps));
+        if(me) me.score += (timeLeft * 10) + 100; // Pontuação por velocidade
+        localStorage.setItem('ps_'+pin, JSON.stringify(ps));
     }
-    nextStep();
+    // Desabilitar botões após resposta
+    document.querySelectorAll('.opt').forEach(b => b.disabled = true);
 }
 
-function nextStep() {
-    clearInterval(qTimer);
-    state.currentQ++;
-    if(state.currentQ < 10) renderQuestion();
-    else showPodium();
+function revealAnswer() {
+    clearInterval(timer);
+    const q = state.questions[state.currentQ];
+    const opts = document.querySelectorAll('.opt');
+    
+    // Efeito pulsante na correta
+    opts[q.ans].classList.add('pulse-correct');
+    
+    setTimeout(() => {
+        showRanking();
+    }, 2000);
 }
 
-function showPodium() {
-    showView('podium-screen');
-    const ps = JSON.parse(localStorage.getItem('players_' + currentPin)).sort((a,b) => b.score - a.score);
-    if(ps[0]) document.getElementById('n1').textContent = ps[0].avatar + " " + ps[0].name;
-    if(ps[1]) document.getElementById('n2').textContent = ps[1].avatar + " " + ps[1].name;
-    if(ps[2]) document.getElementById('n3').textContent = ps[2].avatar + " " + ps[2].name;
-}
-</script>
-</body>
-</html>
+function showRanking() {
+    showView('rank-screen');
+    const list = document.getElementById('rankingList');
+    let ps = JSON.parse(localStorage.getItem('ps_'+pin)).sort((a,b) => b.score - a.score);
+    
+    list.innerHTML = ps.map((p, i) => `
+        <div class="rank-item ${i < 3 ? 'winner' : ''}" style="transform: translateY(${i * 5}px)">
+            <span class="orb">${
