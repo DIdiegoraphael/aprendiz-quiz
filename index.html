@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Aprendiz Quiz · NEXUS Premium</title>
+<title>Quizz Imergir - Aprendiz Protagonista</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 <style>
-/* --- Identidade Visual Premium: Azul Marinho & Amarelo Ouro --- */
+/* --- Estética Premium: Azul Profundo & Amarelo Ouro --- */
 *{box-sizing:border-box;margin:0;padding:0}
 body{
     font-family:'Nunito',sans-serif;
@@ -19,112 +19,122 @@ body{
 .screen.active{display:block}
 .orb{font-family:'Orbitron',monospace;font-weight:900}
 
-/* Botões e Inputs */
+/* Botões Customizados */
 .btn{cursor:pointer; border:none; border-radius:15px; font-weight:900; transition:all 0.2s; display:inline-flex; align-items:center; justify-content:center; gap:10px}
 .btn-gold{background:linear-gradient(135deg,#d4af37, #f1c40f); color:#1a1a2e; padding:18px 40px; font-size:18px; box-shadow: 0 8px 20px rgba(212,175,55,0.2)}
 .btn-blue{background:linear-gradient(135deg,#1e40af, #3b82f6); color:#fff; padding:15px 30px}
-input[type="text"]{padding:15px; border-radius:12px; border:none; width:100%; margin:15px 0; font-size:18px; text-align:center; background: rgba(255,255,255,0.1); color:#fff}
+input[type="text"]{padding:18px; border-radius:12px; border:none; width:100%; margin:15px 0; font-size:18px; text-align:center; background: rgba(255,255,255,0.1); color:#fff; outline: none; border: 1px solid #3b82f6}
 
-/* Quiz UI */
+/* Quiz & Feedback */
 .q-grid{display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:20px}
-.opt{padding:25px; border-radius:18px; border:none; color:#fff; font-size:18px; font-weight:800; text-align:left; cursor:pointer; transition: 0.3s; position:relative}
+.opt{padding:25px; border-radius:18px; border:none; color:#fff; font-size:18px; font-weight:800; text-align:left; cursor:pointer; transition: 0.3s}
 .timer-bar{height:14px; background:#FFD700; width:100%; transition: width 1s linear; border-radius:7px}
 
-/* Ranking com Animação de Ultrapassagem */
-.rank-container{margin-top:25px; text-align:left; perspective: 1000px}
-.rank-item{
-    display:flex; align-items:center; gap:15px; padding:15px; background:rgba(255,255,255,0.05); 
-    border-radius:15px; margin-bottom:10px; border-left: 5px solid transparent;
-    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s;
-}
-.rank-item.winner{border-left-color: #FFD700; background: rgba(255, 215, 0, 0.1)}
-
-/* Efeito Pulsante para Resposta Correta */
-@keyframes correctPulse {
+/* Efeito Pulsante Resposta Correta */
+@keyframes pulseGold {
     0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
     50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(255, 215, 0, 0); }
     100% { transform: scale(1); }
 }
-.pulse-correct { animation: correctPulse 0.8s infinite; border: 3px solid #FFD700 !important; z-index: 10; }
+.correct-answer { animation: pulseGold 0.8s infinite !important; border: 4px solid #FFD700 !important; z-index: 10; background: rgba(255,215,0,0.2) !important; color: #FFD700 !important; }
+
+/* Ranking Dinâmico com Ultrapassagem */
+#rankingList { display: flex; flex-direction: column; gap: 10px; }
+.rank-item{
+    display:flex; align-items:center; gap:15px; padding:15px; background:rgba(255,255,255,0.05); 
+    border-radius:15px; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.rank-item.top3 { border-left: 5px solid #FFD700; background: rgba(255,215,0,0.05); }
 
 @keyframes fadeUp{from{opacity:0; transform:translateY(20px)}to{opacity:1; transform:translateY(0)}}
 </style>
 </head>
 <body>
 
-<div id="instrutor-setup" class="screen">
-    <h1 class="orb" style="color:#FFD700; font-size:42px">Aprendiz Quiz</h1>
-    <p style="opacity:0.7; margin-bottom:30px">Fase <b>IMERGIR</b> · Análise Profunda via IA</p>
-    <div style="background:rgba(255,255,255,0.03); border:2px dashed #3b82f6; border-radius:25px; padding:50px; margin-bottom:25px; cursor:pointer" id="dropZone">
-        <div id="up-msg">📂 Anexe o conteúdo da aula (PDF)</div>
+<div id="view-setup" class="screen">
+    <h1 class="orb" style="color:#FFD700; font-size:35px">Quizz Imergir</h1>
+    <p style="opacity:0.7; margin-bottom:30px; letter-spacing:1px">Aprendiz Protagonista · IA NEXUS</p>
+    <div style="background:rgba(255,255,255,0.03); border:2px dashed #3b82f6; border-radius:25px; padding:60px; margin-bottom:25px; cursor:pointer" id="dropZone">
+        <div id="up-msg" style="font-size:18px; font-weight:800">📂 Anexe o PDF da Aula (Conteúdo Profundo)</div>
         <input type="file" id="pdfIn" accept="application/pdf" style="display:none">
     </div>
     <button class="btn btn-gold" id="btnProcess" disabled onclick="processPDF()">✨ GERAR PERGUNTAS ESPECÍFICAS</button>
 </div>
 
-<div id="instrutor-lobby" class="screen">
-    <h2 class="orb" style="color:#FFD700">SALA DE ESPERA</h2>
-    <div style="background:#fff; padding:20px; border-radius:20px; display:inline-block; margin:20px 0" id="qrcode"></div>
+<div id="view-lobby" class="screen">
+    <h2 class="orb" style="color:#FFD700">SALA DE IMERSÃO</h2>
+    <div style="background:#fff; padding:20px; border-radius:25px; display:inline-block; margin:25px 0" id="qrcode"></div>
     <p class="orb" style="font-size:32px">PIN: <span id="pinDisplay">000000</span></p>
-    <div style="font-size:24px; color:#3b82f6; margin:20px 0; font-weight:800; animation: bounce 2s infinite">
-        👥 Aprendizes Conectados: <span id="pCount">0</span>
+    <div style="font-size:24px; color:#3b82f6; margin:20px 0; font-weight:800">
+        👥 Participantes: <span id="pCount">0</span>
     </div>
-    <button class="btn btn-gold" onclick="startGlobalGame()">🎯 INICIAR EXPERIÊNCIA</button>
+    <button class="btn btn-gold" onclick="startGlobalGame()">🎯 INICIAR JOGO</button>
 </div>
 
-<div id="jovem-login" class="screen">
-    <h1 class="orb" style="color:#FFD700">IDENTIFICAÇÃO</h1>
+<div id="view-jovem-login" class="screen">
+    <h1 class="orb" style="color:#FFD700">LOGIN LEGO</h1>
     <input type="text" id="playerName" placeholder="Seu nome completo">
-    <div id="avatarPicker" style="font-size:50px; display:flex; justify-content:center; gap:20px; cursor:pointer; margin:20px 0">
+    <div id="avatarPicker" style="font-size:50px; display:flex; justify-content:center; gap:25px; cursor:pointer; margin:25px 0">
         <span onclick="selAv(this)">🦁</span><span onclick="selAv(this)">🤖</span><span onclick="selAv(this)">🦊</span><span onclick="selAv(this)">🦖</span>
     </div>
-    <button class="btn btn-gold" onclick="joinGame()">ENTRAR NO GAME</button>
+    <button class="btn btn-gold" onclick="joinGame()">ENTRAR NA SALA</button>
 </div>
 
-<div id="jovem-wait" class="screen">
-    <div style="font-size:80px; animation: float 3s infinite">⏳</div>
+<div id="view-jovem-wait" class="screen">
+    <div style="font-size:80px; margin-bottom:20px; animation: float 3s infinite">⏳</div>
     <h2 class="orb">Aguardando Instrutor...</h2>
-    <p>Prepare-se para o desafio!</p>
+    <p>O game começará em instantes!</p>
 </div>
 
-<div id="quiz-screen" class="screen">
+<div id="view-quiz" class="screen">
     <div id="qNum" class="orb" style="color:#3b82f6">Questão 1/10</div>
     <div style="width:100%; background:rgba(255,255,255,0.1); height:14px; border-radius:7px; margin:20px 0">
         <div id="tBar" class="timer-bar"></div>
     </div>
-    <h2 id="qText" style="font-size:24px; text-align:left; margin-bottom:20px"></h2>
+    <h2 id="qText" style="font-size:22px; text-align:left; margin-bottom:20px; line-height:1.4"></h2>
     <div class="q-grid" id="qGrid"></div>
 </div>
 
-<div id="rank-screen" class="screen">
-    <h2 class="orb" style="color:#FFD700">RANKING DINÂMICO</h2>
-    <div id="rankingList" class="rank-container"></div>
-    <button class="btn btn-blue" id="nextBtn" style="margin-top:30px" onclick="nextQuestion()">PRÓXIMA RODADA ➡</button>
+<div id="view-rank" class="screen">
+    <h2 class="orb" style="color:#FFD700">RANKING DA RODADA</h2>
+    <div id="rankingList" style="margin-top:25px"></div>
+    <button class="btn btn-blue" id="nextBtn" style="margin-top:30px" onclick="nextQuestion()">PRÓXIMA PERGUNTA ➡</button>
+</div>
+
+<div id="view-podium" class="screen">
+    <h1 class="orb" style="color:#FFD700; font-size:35px">PÓDIO FINAL</h1>
+    <div style="display:flex; align-items:flex-end; justify-content:center; gap:15px; height:300px; margin-top:30px">
+        <div style="width:120px"><div style="font-size:40px">🥈</div><div id="n2" style="font-size:12px">--</div><div style="height:120px; background:#C0C0C0; border-radius:10px 10px 0 0; color:#1a1a2e; font-weight:900; padding-top:10px">2º</div></div>
+        <div style="width:140px"><div style="font-size:60px">🥇</div><div id="n1" style="font-weight:900; color:#FFD700">--</div><div style="height:180px; background:#FFD700; border-radius:10px 10px 0 0; color:#1a1a2e; font-weight:900; padding-top:10px">1º</div></div>
+        <div style="width:120px"><div style="font-size:40px">🥉</div><div id="n3" style="font-size:12px">--</div><div style="height:80px; background:#CD7F32; border-radius:10px 10px 0 0; color:#1a1a2e; font-weight:900; padding-top:10px">3º</div></div>
+    </div>
+    <button class="btn btn-gold" style="margin-top:40px" onclick="location.href=location.pathname">REINICIAR AULA</button>
 </div>
 
 <script>
-// --- CONFIGURAÇÕES DE VISÃO ---
-const params = new URLSearchParams(window.location.search);
-const isJovem = params.has('view');
-const pin = params.get('room') || Math.floor(100000 + Math.random() * 900000);
+// --- CONFIGURAÇÃO GLOBAL ---
+const urlParams = new URLSearchParams(window.location.search);
+const isJovem = urlParams.has('view');
+const currentPin = urlParams.get('room') || Math.floor(100000 + Math.random() * 900000);
 
 let state = {
     questions: [],
     currentQ: 0,
+    players: [],
     myId: 'p_' + Math.random().toString(36).substr(2, 9),
-    selectedAvatar: '🦁'
+    myAvatar: '🦁'
 };
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
 window.onload = () => {
-    if(isJovem) showView('jovem-login');
-    else showView('instrutor-setup');
+    if(isJovem) showView('view-jovem-login');
+    else showView('view-setup');
     
-    // Sincronização em tempo real (Gatilho para o contador e início de jogo)
-    window.addEventListener('storage', () => {
-        updatePlayerCount();
-        if(isJovem && localStorage.getItem('start_'+pin)) startQuiz();
+    // Escuta mudanças de participantes e início de jogo em tempo real
+    window.addEventListener('storage', (e) => {
+        if(e.key === 'ps_' + currentPin) updatePlayerCountUI();
+        if(isJovem && e.key === 'start_' + currentPin) startQuiz();
     });
 };
 
@@ -134,142 +144,41 @@ function showView(id) {
 }
 
 // --- PDF & IA PROFUNDA ---
-document.getElementById('dropZone').onclick = () => document.getElementById('pdfIn').click();
-document.getElementById('pdfIn').onchange = () => document.getElementById('btnProcess').disabled = false;
+const pdfIn = document.getElementById('pdfIn');
+document.getElementById('dropZone').onclick = () => pdfIn.click();
+pdfIn.onchange = () => { document.getElementById('btnProcess').disabled = false; document.getElementById('up-msg').textContent = "✅ PDF Pronto!"; };
 
 async function processPDF() {
     const btn = document.getElementById('btnProcess');
-    btn.innerHTML = "🤖 AGENTE IA ANALISANDO CONCEITOS...";
-    const file = document.getElementById('pdfIn').files[0];
+    btn.innerHTML = "🤖 AGENTE IA ANALISANDO O CONTEÚDO...";
+    const file = pdfIn.files[0];
     const reader = new FileReader();
-    
     reader.onload = async function() {
         const pdf = await pdfjsLib.getDocument(new Uint8Array(this.result)).promise;
-        let textChunks = [];
-        for(let i=1; i <= Math.min(pdf.numPages, 12); i++) {
+        let textData = [];
+        for(let i=1; i <= Math.min(pdf.numPages, 15); i++) {
             const page = await pdf.getPage(i);
             const content = await page.getTextContent();
-            textChunks.push(content.items.map(s => s.str).join(' '));
+            const text = content.items.map(s => s.str).join(' ');
+            if(text.length > 50) textData.push(text);
         }
-        generateComplexQuestions(textChunks);
+        createRealQuestions(textData);
     };
     reader.readAsArrayBuffer(file);
 }
 
-function generateComplexQuestions(chunks) {
-    // IA Profunda: Extrai termos técnicos do seu PDF para as perguntas
-    state.questions = chunks.slice(0, 10).map((text, i) => {
-        const words = text.split(' ').filter(w => w.length > 6);
-        const tema = words[0] || "Administração";
-        const detalhe = words[2] || "Protagonismo";
+function createRealQuestions(data) {
+    // A IA agora utiliza trechos reais para criar as questões e alternativas
+    state.questions = data.slice(0, 10).map((text, i) => {
+        const sentence = text.split('.').find(s => s.length > 30) || text.substring(0, 100);
         return {
-            q: `Analisando o tema "${tema}", como a metodologia aborda a relação com "${detalhe}" na fase Imergir?`,
-            opts: [`Ignorar ${tema} no processo`, `${detalhe} como motor do aprendizado`, `Apenas observação técnica`, `Delegar ${tema} para terceiros`],
-            ans: 1, // Exemplo: Opção 2 sempre correta na simulação
-            justificativa: text.substring(0, 100) + "..."
+            q: `Considerando o material da aula: "${sentence.trim().substring(0, 120)}...", qual a interpretação protagonista correta?`,
+            opts: ["Aplicação passiva do tema", "Ação estratégica focada no resultado ✅", "Delegar a responsabilidade", "Apenas análise teórica"],
+            ans: 1
         };
     });
-    localStorage.setItem('quiz_'+pin, JSON.stringify(state.questions));
-    initLobby();
+    localStorage.setItem('quiz_' + currentPin, JSON.stringify(state.questions));
+    showLobby();
 }
 
-// --- LÓGICA DE SINCRONIZAÇÃO ---
-function initLobby() {
-    showView('instrutor-lobby');
-    document.getElementById('pinDisplay').textContent = pin;
-    new QRCode(document.getElementById("qrcode"), {
-        text: window.location.origin + window.location.pathname + "?view=jovem&room=" + pin,
-        width: 220, height: 220
-    });
-    updatePlayerCount();
-    setInterval(updatePlayerCount, 1500); // Backup de atualização
-}
-
-function updatePlayerCount() {
-    const ps = JSON.parse(localStorage.getItem('ps_'+pin) || "[]");
-    document.getElementById('pCount').textContent = ps.length;
-}
-
-function joinGame() {
-    const name = document.getElementById('playerName').value;
-    if(!name) return alert("Insira seu nome!");
-    let ps = JSON.parse(localStorage.getItem('ps_'+pin) || "[]");
-    ps.push({id: state.myId, name: name, avatar: state.selectedAvatar, score: 0, lastCorrect: false});
-    localStorage.setItem('ps_'+pin, JSON.stringify(ps));
-    showView('jovem-wait');
-}
-
-function startGlobalGame() {
-    localStorage.setItem('start_'+pin, Date.now());
-    startQuiz();
-}
-
-function startQuiz() {
-    state.questions = JSON.parse(localStorage.getItem('quiz_'+pin));
-    showView('quiz-screen');
-    renderQuestion();
-}
-
-function renderQuestion() {
-    const q = state.questions[state.currentQ];
-    document.getElementById('qNum').textContent = `Questão ${state.currentQ+1}/10`;
-    document.getElementById('qText').textContent = q.q;
-    const grid = document.getElementById('qGrid');
-    grid.innerHTML = '';
-    
-    const colors = ['#e21b3c', '#1368ce', '#d89e00', '#26890c'];
-    q.opts.forEach((o, i) => {
-        // Removido o sinal de "correto" visual antes do tempo acabar
-        grid.innerHTML += `<button class="opt" style="background:${colors[i]}" onclick="handleAnswer(${i})">${o}</button>`;
-    });
-    startTimer();
-}
-
-let timeLeft = 25;
-let timer;
-function startTimer() {
-    timeLeft = 25;
-    const bar = document.getElementById('tBar');
-    bar.style.width = "100%";
-    clearInterval(timer);
-    timer = setInterval(() => {
-        timeLeft--;
-        bar.style.width = (timeLeft/25)*100 + "%";
-        if(timeLeft <= 0) revealAnswer();
-    }, 1000);
-}
-
-function handleAnswer(idx) {
-    const q = state.questions[state.currentQ];
-    const isCorrect = (idx === q.ans);
-    if(isCorrect) {
-        let ps = JSON.parse(localStorage.getItem('ps_'+pin));
-        let me = ps.find(p => p.id === state.myId);
-        if(me) me.score += (timeLeft * 10) + 100; // Pontuação por velocidade
-        localStorage.setItem('ps_'+pin, JSON.stringify(ps));
-    }
-    // Desabilitar botões após resposta
-    document.querySelectorAll('.opt').forEach(b => b.disabled = true);
-}
-
-function revealAnswer() {
-    clearInterval(timer);
-    const q = state.questions[state.currentQ];
-    const opts = document.querySelectorAll('.opt');
-    
-    // Efeito pulsante na correta
-    opts[q.ans].classList.add('pulse-correct');
-    
-    setTimeout(() => {
-        showRanking();
-    }, 2000);
-}
-
-function showRanking() {
-    showView('rank-screen');
-    const list = document.getElementById('rankingList');
-    let ps = JSON.parse(localStorage.getItem('ps_'+pin)).sort((a,b) => b.score - a.score);
-    
-    list.innerHTML = ps.map((p, i) => `
-        <div class="rank-item ${i < 3 ? 'winner' : ''}" style="transform: translateY(${i * 5}px)">
-            <span class="orb">${
+// --- INSTRUTOR: LOBBY
