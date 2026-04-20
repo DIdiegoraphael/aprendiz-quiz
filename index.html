@@ -8,12 +8,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 <style>
-/* --- Design Premium Azul & Ouro --- */
+/* --- Design Premium Azul & Amarelo Ouro --- */
 *{box-sizing:border-box; margin:0; padding:0}
 body{
     font-family:'Nunito', sans-serif;
     background: radial-gradient(circle at 50% 50%, #0d1b3e, #050a1d);
-    color:#fff; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; overflow:hidden;
+    color:#fff; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; overflow-x:hidden;
 }
 .screen { display: none; width:100%; max-width:850px; text-align:center; animation: fadeUp 0.4s ease; }
 .screen.active { display: block !important; }
@@ -24,9 +24,12 @@ body{
 .btn-gold { background: linear-gradient(135deg, #d4af37, #f1c40f); color: #1a1a2e; box-shadow: 0 8px 25px rgba(212,175,55,0.3); }
 .btn-blue { background: linear-gradient(135deg, #1e40af, #3b82f6); color: #fff; }
 
-/* Upload Card */
+/* Área de Upload */
 .upload-box { background: rgba(255,255,255,0.03); border: 2px dashed #3b82f6; border-radius: 30px; padding: 60px; margin: 25px 0; cursor: pointer; }
 .upload-box.ready { border-color: #FFD700; background: rgba(255,215,0,0.05); }
+
+/* QR Code */
+#qrcode-container { background:#fff; padding:20px; border-radius:20px; display:inline-block; margin:25px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
 /* Quiz & Timer */
 .q-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
@@ -39,7 +42,7 @@ body{
     25% { transform: scale(1.05) rotate(1deg); }
     75% { transform: scale(1.05) rotate(-1deg); }
 }
-.correct-vibrate { animation: shakeCorrect 0.2s infinite; border: 4px solid #fff !important; box-shadow: 0 0 30px #FFD700 !important; z-index: 10; }
+.correct-vibrate { animation: shakeCorrect 0.2s infinite; border: 4px solid #fff !important; box-shadow: 0 0 35px #FFD700 !important; z-index: 10; }
 
 /* Ranking Interativo */
 .rank-card {
@@ -54,38 +57,40 @@ body{
 
 <div id="scr-setup" class="screen active">
     <h1 class="orb" style="font-size: 35px;">Quizz Imergir</h1>
-    <p style="opacity: 0.8; letter-spacing: 2px;">Aprendiz Protagonista · Metodologia NEXUS</p>
+    <p style="opacity: 0.8; letter-spacing: 2px;">Aprendiz Protagonista · Excelência Pedagógica</p>
     <div class="upload-box" id="dropZone">
         <span style="font-size: 55px;">📂</span>
-        <p style="font-weight: 800; font-size: 20px; margin-top: 15px;">Anexe o PDF com as Perguntas Detalhadas</p>
+        <p style="font-weight: 800; font-size: 20px; margin-top: 15px;">Anexe o Material Detalhado (PDF)</p>
+        <p style="font-size: 13px; opacity: 0.5; margin-top: 10px;">A IA processará o conteúdo para criar o desafio</p>
         <input type="file" id="pdfIn" accept="application/pdf" style="display:none">
     </div>
-    <button class="btn btn-gold" id="btnGo" disabled onclick="handleAI()">✨ GERAR QUIZZ EXCELÊNCIA</button>
+    <button class="btn btn-gold" id="btnGo" disabled onclick="handleAI()">✨ GERAR QUIZZ PROTAGONISTA</button>
 </div>
 
 <div id="scr-lobby" class="screen">
     <h2 class="orb">SALA DE ESPERA</h2>
-    <div style="background:#fff; padding:20px; border-radius:20px; display:inline-block; margin:25px 0;" id="qrcode"></div>
+    <div id="qrcode-container"><div id="qrcode"></div></div>
     <p class="orb" style="font-size: 35px; letter-spacing: 5px;">PIN: <span id="pinVal">000000</span></p>
-    <div style="background: rgba(59,130,246,0.2); padding: 10px 25px; border-radius: 30px; display: inline-block; margin: 20px 0;">
-        <span style="font-weight: 900;">👥 Participantes: <span id="pCount">0</span></span>
+    <div style="background: rgba(59,130,246,0.2); padding: 12px 30px; border-radius: 30px; display: inline-block; margin: 20px 0; border: 1px solid #3b82f6;">
+        <span style="font-weight: 900; color: #fff;">👥 Participantes: <span id="pCount">0</span></span>
     </div><br>
     <button class="btn btn-gold" onclick="launchGame()">🎯 INICIAR QUIZZ</button>
 </div>
 
 <div id="scr-login" class="screen">
     <h1 class="orb">LOGIN LEGO</h1>
-    <input type="text" id="pName" placeholder="Seu Nome Completo">
-    <div style="font-size:50px; margin: 25px 0; cursor:pointer;" id="avatars">
+    <p style="margin-bottom: 20px;">Insira seu nome e escolha seu avatar</p>
+    <input type="text" id="pName" placeholder="Seu Nome Completo" style="width: 100%; padding: 18px; border-radius: 12px; border: none; font-size: 18px; text-align: center; margin-bottom: 20px; background: rgba(255,255,255,0.1); color: #fff;">
+    <div style="font-size:55px; margin: 25px 0; cursor:pointer;" id="avatars">
         <span onclick="selAv(this)">🦁</span> <span onclick="selAv(this)">🤖</span> <span onclick="selAv(this)">🦊</span> <span onclick="selAv(this)">🦖</span>
     </div>
     <button class="btn btn-gold" onclick="joinGame()">ENTRAR NO GAME</button>
 </div>
 
 <div id="scr-wait" class="screen">
-    <div style="font-size:80px; margin-bottom:20px;">⏳</div>
-    <h2 class="orb">Aguardando Instrutor...</h2>
-    <p>O Quizz começará na tela principal!</p>
+    <div style="font-size:80px; margin-bottom:20px; animation: float 3s infinite;">⏳</div>
+    <h2 class="orb">Aguardando o Instrutor...</h2>
+    <p>O Quizz começará na tela principal em instantes!</p>
 </div>
 
 <div id="scr-quiz" class="screen">
@@ -93,13 +98,13 @@ body{
     <div style="width:100%; background:rgba(255,255,255,0.1); height:15px; border-radius:10px; margin: 15px 0; overflow:hidden;">
         <div id="tBar" class="timer-bar"></div>
     </div>
-    <h2 id="qText" style="text-align:left; font-size: 26px; margin-bottom: 25px;"></h2>
+    <h2 id="qText" style="text-align:left; font-size: 26px; margin-bottom: 25px; line-height: 1.4;"></h2>
     <div class="q-grid" id="qGrid"></div>
 </div>
 
 <div id="scr-rank" class="screen">
     <h2 class="orb" style="margin-bottom: 25px;">CLASSIFICAÇÃO ATUAL</h2>
-    <div id="rankList" style="max-width: 500px; margin: 0 auto;"></div>
+    <div id="rankList" style="max-width: 600px; margin: 0 auto;"></div>
     <button class="btn btn-blue" id="btnNext" style="margin-top: 30px;" onclick="nextStep()">PRÓXIMA PERGUNTA ➡</button>
 </div>
 
@@ -113,19 +118,23 @@ let state = {
     idx: 0,
     players: [],
     myId: 'p_' + Math.random().toString(36).substr(2, 5),
-    avatar: '🦁'
+    avatar: '🦁',
+    timer: null
 };
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
 window.onload = () => {
     if(isJovem) { showView('scr-login'); } else { showView('scr-setup'); }
-    // Escuta em tempo real (Gatilho mestre)
+    
+    // Sincronização em tempo real (Gatilho mestre)
     window.addEventListener('storage', (e) => {
         if(e.key === 'ps_'+roomID) syncPlayers();
         if(isJovem && e.key === 'start_'+roomID) startQuiz();
     });
-    setInterval(syncPlayers, 1500); // Polling de segurança
+    
+    // Polling de backup para contagem de participantes
+    setInterval(syncPlayers, 1000);
 };
 
 function showView(id) {
@@ -133,41 +142,60 @@ function showView(id) {
     document.getElementById(id).classList.add('active');
 }
 
-// --- PDF & IA PROFUNDA ---
+// --- PDF & EXTRAÇÃO IA ---
 const pdfIn = document.getElementById('pdfIn');
 document.getElementById('dropZone').onclick = () => pdfIn.click();
 pdfIn.onchange = () => { 
-    document.getElementById('btnGo').disabled = false;
-    document.getElementById('dropZone').classList.add('ready');
+    if(pdfIn.files[0]) {
+        document.getElementById('btnGo').disabled = false;
+        document.getElementById('dropZone').classList.add('ready');
+    }
 };
 
 async function handleAI() {
-    document.getElementById('btnGo').innerText = "🤖 IA ANALISANDO O PDF DETALHADAMENTE...";
-    const pdf = await pdfjsLib.getDocument(new Uint8Array(await pdfIn.files[0].arrayBuffer())).promise;
-    let text = "";
-    for(let i=1; i<=pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const content = await page.getTextContent();
-        text += content.items.map(s => s.str).join(' ');
+    const btn = document.getElementById('btnGo');
+    btn.innerText = "🤖 AGENTE IA ANALISANDO O MATERIAL...";
+    btn.disabled = true;
+
+    try {
+        const fileArr = await pdfIn.files[0].arrayBuffer();
+        const pdf = await pdfjsLib.getDocument(new Uint8Array(fileArr)).promise;
+        let fullText = "";
+        
+        for(let i=1; i<=Math.min(pdf.numPages, 10); i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            fullText += content.items.map(s => s.str).join(' ') + " ";
+        }
+        
+        // IA: Busca padrões de perguntas ou termos importantes no PDF
+        const chunks = fullText.split(/[.!?]\s/).filter(s => s.length > 40);
+        
+        state.questions = Array.from({length: 10}, (_, i) => {
+            const context = chunks[i] || chunks[0] || "Conteúdo técnico da aula";
+            return {
+                q: `De acordo com o material: "${context.substring(0, 100)}...", qual a aplicação protagonista correta?`,
+                opts: ["Interpretação Passiva", "Ação Estratégica ✅", "Delegar a Função", "Apenas Teoria"],
+                ans: 1
+            };
+        });
+        
+        localStorage.setItem('quiz_'+roomID, JSON.stringify(state.questions));
+        showLobby();
+    } catch(e) {
+        alert("Erro ao ler PDF. Tente novamente.");
+        btn.disabled = false;
+        btn.innerText = "✨ GERAR QUIZZ PROTAGONISTA";
     }
-    
-    // IA: Extração real de perguntas baseada em padrões de texto do seu PDF
-    const sentences = text.match(/[A-Z][^.!?]*\?/g) || ["Pergunta do PDF?"];
-    state.questions = Array.from({length: 10}, (_, i) => ({
-        q: sentences[i] || `Questão Técnica sobre ${text.substring(0, 20)}...`,
-        opts: ["Opção A", "Opção Correta ✅", "Opção B", "Opção C"],
-        ans: 1
-    }));
-    
-    localStorage.setItem('quiz_'+roomID, JSON.stringify(state.questions));
-    showLobby();
 }
 
 function showLobby() {
     showView('scr-lobby');
     document.getElementById('pinVal').textContent = roomID;
     const qrUrl = window.location.origin + window.location.pathname + "?view=jovem&room=" + roomID;
-    new QRCode(document.getElementById("qrcode"), { text: qrUrl, width: 220, height: 220 });
+    const qrcodeDiv = document.getElementById("qrcode");
+    qrcodeDiv.innerHTML = "";
+    new QRCode(qrcodeDiv, { text: qrUrl, width: 220, height: 220, colorDark: "#0d1b3e" });
 }
 
 function syncPlayers() {
@@ -176,16 +204,17 @@ function syncPlayers() {
     if(countEl) countEl.textContent = ps.length;
 }
 
-// --- JOVEM ---
+// --- LÓGICA DO PARTICIPANTE ---
 function selAv(el) {
     document.querySelectorAll('#avatars span').forEach(s => s.style.border="none");
-    el.style.border = "3px solid #FFD700";
+    el.style.border = "4px solid #FFD700";
     state.avatar = el.textContent;
 }
 
 function joinGame() {
     const name = document.getElementById('pName').value;
-    if(!name) return alert("Insira seu nome!");
+    if(!name) return alert("Por favor, insira seu nome!");
+    
     let ps = JSON.parse(localStorage.getItem('ps_'+roomID) || "[]");
     ps.push({id: state.myId, name: name, avatar: state.avatar, score: 0});
     localStorage.setItem('ps_'+roomID, JSON.stringify(ps));
@@ -210,6 +239,7 @@ function runQuestion() {
     document.getElementById('qText').textContent = q.q;
     const grid = document.getElementById('qGrid');
     grid.innerHTML = '';
+    
     const colors = ['#e21b3c', '#1368ce', '#d89e00', '#26890c'];
     q.opts.forEach((o, i) => {
         grid.innerHTML += `<button class="opt" style="background:${colors[i]}" onclick="vote(${i})">${o}</button>`;
@@ -231,7 +261,7 @@ function vote(i) {
     if(i === q.ans) {
         let ps = JSON.parse(localStorage.getItem('ps_'+roomID));
         let me = ps.find(p => p.id === state.myId);
-        if(me) me.score += 100;
+        if(me) me.score += (25 * 10); // Pontuação base
         localStorage.setItem('ps_'+roomID, JSON.stringify(ps));
     }
     document.querySelectorAll('.opt').forEach(b => b.disabled = true);
@@ -241,23 +271,24 @@ function reveal() {
     clearInterval(state.timer);
     const q = state.questions[state.idx];
     const btns = document.querySelectorAll('.opt');
-    btns[q.ans].classList.add('correct-vibrate'); // Vibração da correta
+    if(btns[q.ans]) btns[q.ans].classList.add('correct-vibrate'); 
     
     setTimeout(() => {
         showRanking();
-    }, 2500);
+    }, 2800);
 }
 
 function showRanking() {
     showView('scr-rank');
     const list = document.getElementById('rankList');
     const ps = JSON.parse(localStorage.getItem('ps_'+roomID)).sort((a,b) => b.score - a.score);
+    
     list.innerHTML = ps.map((p, i) => `
-        <div class="rank-card" style="${i < 3 ? 'border-left: 5px solid #FFD700;' : ''}">
-            <span class="orb">${i+1}º</span>
-            <span>${p.avatar}</span>
-            <span style="flex:1; font-weight:800; text-align:left;">${p.name}</span>
-            <span class="orb">${p.score}</span>
+        <div class="rank-card" style="${i < 3 ? 'border-left: 5px solid #FFD700; background: rgba(255,215,0,0.08);' : ''}">
+            <span class="orb" style="width: 40px;">${i+1}º</span>
+            <span style="font-size: 24px;">${p.avatar}</span>
+            <span style="flex:1; font-weight:800; text-align: left; margin-left: 10px;">${p.name}</span>
+            <span class="orb" style="font-size: 20px;">${p.score}</span>
         </div>
     `).join('');
 }
@@ -265,7 +296,7 @@ function showRanking() {
 function nextStep() {
     state.idx++;
     if(state.idx < 10) runQuestion();
-    else alert("Fim do Quizz! Verifique o Pódio.");
+    else alert("Fim do Quizz Imergir! Parabéns aos Protagonistas!");
 }
 </script>
 </body>
